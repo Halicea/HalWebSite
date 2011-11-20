@@ -2,7 +2,7 @@
 from lib.djangoFormImports import widgets, fields, extras
 from django.forms import Form, BaseForm
 from google.appengine.ext.db.djangoforms import ModelForm
-from Models.BaseModels import *
+from models.BaseModels import *
 
 class PersonForm(ModelForm):
     class Meta():

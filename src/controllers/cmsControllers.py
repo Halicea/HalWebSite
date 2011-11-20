@@ -1,15 +1,15 @@
 import yaml
 from lib.halicea.decorators import *
-import Models.cmsModels as cms
-from Controllers.BaseControllers import LoginController
+import models.cmsModels as cms
+from controllers.BaseControllers import LoginController
 from lib.halicea.HalRequestHandler import HalRequestHandler as hrh
-from Forms.cmsForms import CMSContentForm
+from forms.cmsForms import CMSContentForm
 from google.appengine.api import memcache
 from google.appengine.ext import db
 from lib import messages
 from django.utils import simplejson
-from Models.cmsModels import Comment, ContentTag
-from Forms.cmsForms import CommentForm
+from models.cmsModels import Comment, ContentTag
+from forms.cmsForms import CommentForm
 import logging
 
 

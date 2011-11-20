@@ -1,8 +1,8 @@
 #{%block imports%}
-from Controllers import BaseControllers
-from Controllers import ShellControllers
-from Controllers import HalWebControllers
-from Controllers import cmsControllers
+from controllers import BaseControllers
+from controllers import ShellControllers
+from controllers import HalWebControllers
+from controllers import cmsControllers
 #{%endblock%}
 webapphandlers = [
 #{%block ApplicationControllers %}

@@ -3,7 +3,7 @@ __author__ = 'KMihajlov'
 from google.appengine.ext.db.djangoforms import ModelForm
 from django.forms import Form, BaseForm, fields, widgets
 from django.forms.extras import widgets as extras
-from Models.cmsModels import *
+from models.cmsModels import *
 #{%endblock%}
 
 class CMSContentForm(Form):

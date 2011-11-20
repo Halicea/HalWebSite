@@ -1,17 +1,17 @@
 from google.appengine.api import urlfetch
 from django.utils import simplejson
 import urllib, os
-from Forms.BaseForms import InvitationForm
+from forms.BaseForms import InvitationForm
 from lib.halicea import ContentTypes as ct
 #{%block imports%}
 from lib.halicea.HalRequestHandler import HalRequestHandler as hrh
 from lib.halicea.decorators import *
-from Models.BaseModels import RoleAssociation, RoleAssociationForm 
-from Models.BaseModels import Role, RoleForm 
-from Models.BaseModels import Person
-from Models.BaseModels import Invitation
-from Models.BaseModels import WishList, WishListForm
-from Forms.BaseForms import LoginForm
+from models.BaseModels import RoleAssociation, RoleAssociationForm 
+from models.BaseModels import Role, RoleForm 
+from models.BaseModels import Person
+from models.BaseModels import Invitation
+from models.BaseModels import WishList, WishListForm
+from forms.BaseForms import LoginForm
 #{%endblock%}
 class LoginController( hrh ):
     @Default('login')

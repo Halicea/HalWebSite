@@ -1,5 +1,4 @@
 from datetime import datetime
-from Models.BaseModels import Person
 import uuid
 class FeedEntry(object):
     Title=''

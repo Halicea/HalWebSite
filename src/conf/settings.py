@@ -3,9 +3,11 @@
 import os
 from os.path import join
 #from lib.halicea import deCMSPageControllerfaultControllerMethods as dcm
+RUN = 'appengine'
 DEBUG = True
 TEMPLATE_DEBUG = True
 DEFAULT_CHARSET ='UTF-8'
+
 from lib.halicea import dummyControllerMethods as dcm
 APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
 if os.name == 'nt':
@@ -16,16 +18,16 @@ if os.name == 'nt':
 PROJ_LOC = os.path.dirname(os.path.dirname(__file__))
 
 #MVC Directories
-MODELS_DIR = join(PROJ_LOC,'Models')
-VIEWS_DIR = join(PROJ_LOC,'Views')
-VIEWS_RELATIVE_DIR = 'Views'
-FORM_MODELS_DIR = join(PROJ_LOC, 'Forms')
-CONTROLLERS_DIR = join(PROJ_LOC, 'Controllers')
+MODELS_DIR = join(PROJ_LOC,'models')
+VIEWS_DIR = join(PROJ_LOC,'views')
+VIEWS_RELATIVE_DIR = 'views'
+FORM_MODELS_DIR = join(PROJ_LOC, 'forms')
+CONTROLLERS_DIR = join(PROJ_LOC, 'controllers')
 BASE_VIEWS_DIR = join(VIEWS_DIR, 'bases')
 BLOCK_VIEWS_DIR = join(VIEWS_DIR, 'blocks')
 PAGE_VIEWS_DIR = join(VIEWS_DIR, 'pages')
 FORM_VIEWS_DIR = join(VIEWS_DIR, 'forms')
-STATIC_DATA_DIR = join(PROJ_LOC, 'StaticData')
+STATIC_DATA_DIR = join(PROJ_LOC, 'static_data')
 JSCRIPTS_DIR = join(STATIC_DATA_DIR, 'jscripts')
 IMAGES_DIR = join(STATIC_DATA_DIR, 'images')
 STYLES_DIR = join(STATIC_DATA_DIR, 'styles')
@@ -60,6 +62,7 @@ DEFAULT_OPERATIONS = {
                       'index':{'method':dcm.index, 'view':True}, 
                       'details':{'method':dcm.details, 'view':True},
                       'edit':{'method':dcm.edit, 'view':True},
+                      'create':{'method':dcm.edit, 'view':False},
                       'insert':{'method':dcm.save, 'view':False},
                       'update':{'method':dcm.save, 'view':False},
                       'delete':{'method':dcm.delete, 'view':False},

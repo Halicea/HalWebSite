@@ -1,6 +1,6 @@
 import os, sys, logging, new, traceback, types
 from lib.halicea.HalRequestHandler import HalRequestHandler as hrh
-from Models.ShellModels import Session
+from models.ShellModels import Session
 from google.appengine.api import users
 from google.appengine.ext import db
 from lib.halicea.decorators import *

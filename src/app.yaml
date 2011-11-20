@@ -8,19 +8,19 @@ builtins:
 
 handlers:
 - url: /styles
-  static_dir: StaticData/styles
+  static_dir: static_data/styles
   
 - url: /styles/images
-  static_dir: StaticData/styles/images
+  static_dir: static_data/styles/images
 
 - url: /images
-  static_dir: StaticData/images
+  static_dir: static_data/images
   
 - url: /jscripts
-  static_dir: StaticData/jscripts
+  static_dir: static_data/jscripts
   
 - url: /favicon\.ico
-  static_files: StaticData/images/favicon.ico
+  static_files: static_data/images/favicon.ico
   upload: StaticData/images/favicon\.ico
 #Remote API
 - url: /remote_api
@@ -34,10 +34,10 @@ handlers:
   
 #Admin
 - url: /admin/.*
-  script: Apps/admin.py
+  script: apps/admin.py
   login: admin
 
 #TheRest
 - url: /.*
-  script: Apps/base.py
+  script: apps/base.py
 

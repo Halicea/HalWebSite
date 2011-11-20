@@ -1,6 +1,6 @@
 from google.appengine.ext import webapp
 from google.appengine.ext import db
-from Models.BaseModels import Person
+from models.BaseModels import Person
 
 #from lib.appengine_utilities import sessions
 from lib.gaesessions import get_current_session
