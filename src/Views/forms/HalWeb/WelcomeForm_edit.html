@@ -1,0 +1,28 @@
+<div class="postHeader"><h1>Welcome: </h1></div>
+<div class="postContent">
+    <form id='WelcomeForm' method='post' action='{% url WelcomeController %}'>
+        <input type='hidden' name='op' value={{op}}>
+        <input type='hidden' name='key' value={{WelcomeForm.instance.key}}></input>
+        <table>
+        {% for field in WelcomeForm %}
+            <tr>
+                <td style="text-align:right;">
+                    {{ field.label_tag }}:
+                </td>
+                <td>
+                    {{ field }}
+                </td>
+                <td style='color: red;'>
+                    {{ field.errors }}
+                </td>
+            <tr>
+        {% endfor %}
+        </table>
+        <input type='submit' value={%if WelcomeForm.instance.key%} 'Update' {% else %} 'Create' {%endif%}></input>
+    </form>
+</div>
+<div class="postFooter">
+    <div class="nav">
+    <a href='{%url WelcomeController%}'>Back</a>
+    </div>
+</div>

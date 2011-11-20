@@ -1,0 +1,21 @@
+<h2>Role: </h2>
+<form id='RoleForm' method='post' action='{% url RoleController %}'>
+    <input type='hidden' name='op' value={{op}}>
+    <input type='hidden' name='key' value={{RoleForm.instance.key}}></input>
+<table>
+{% for field in RoleForm %}
+    <tr>
+        <td style="text-align:right;">
+            {{ field.label_tag }}:
+        </td>
+        <td>
+            {{ field }}
+        </td>
+        <td style='color: red;'>
+            {{ field.errors }}
+        </td>
+    <tr>
+{% endfor %}
+</table>
+<input type='submit' value={%if RoleForm.instance.key%} 'Update' {% else %} 'Create' {%endif%}></input>
+</form>

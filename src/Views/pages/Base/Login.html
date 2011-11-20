@@ -1,0 +1,38 @@
+{% extends base %}
+
+{% block content %}
+
+<div class="ui-widget" style="width:70%;margin-left: auto; margin-right: auto;">
+	<table>
+	    <tr><td style="width:50%">
+	        <div class="post" style="margin-left: auto;margin-right: auto;width: 400px;">
+                <div class="postHeader"><h1>Login</h1></div>
+        	    <div class="postContent">
+        		<form action="{% url LoginController %}" method="post">
+                    <table>
+                    {{LoginForm.as_table}}
+        			</table>
+                    <p><input type="submit" value="Login" /></p>
+        		</form>
+                </div>
+        	</div>
+        	
+        </td>
+        <td class="ui-widget-content ui-corner-all" style="width:50%">
+            <div style='text-align:center;padding:15px;'>
+                <h2>Dont Have Account?</h2> 
+                <h1><a href='/AddUser'>Register Now</a></h1>
+            </div>
+        </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div style="width:60%;margin-left: 80px; margin-right: auto;">
+                    <iframe src="http://arman.rpxnow.com/openid/embed?token_url=http%3A%2F%2F{{current_server}}%2FLogin%3Fop%3DJanrainAuth%26redirect_url%3D{{redirect_url}}" scrolling="no" frameBorder="no" allowtransparency="true" style="width:400px;height:240px"></iframe> 
+                </div>
+            </td>
+        </tr>
+	</table>
+</div>
+
+{% endblock %}

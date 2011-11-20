@@ -1,0 +1,24 @@
+<div class="postHeader"><h1>Welcome: </h1></div>
+<div class="postContent">
+<table>
+{% for p in Welcome.properties %}
+    <tr>
+        <td style="text-align:right;">
+            {{ p.label_tag }}:
+        </td>
+        <td>
+            {{ field }}
+        </td>
+        <td style='color: red;'>
+            {{ field.errors }}
+        </td>
+    <tr>
+{% endfor %}
+</table>
+</div>
+<div class="postFooter">
+<div class="nav">
+<a href='{%url WelcomeController%}?op=edit&key=Welcome.key%}'>Edit</a>
+<a href='{%url WelcomeController%}'>Home</a>
+</div>
+</div>

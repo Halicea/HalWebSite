@@ -1,0 +1,22 @@
+<div class="postHeader"><h1>Comment List: </h1></div>
+<div class="postContent">
+<table>
+{% for item in CommentList %}
+    <tr>
+        <td>
+            {{item}}
+        </td>
+        <td><a class='detail' href='{%url CommentController %}?op=edit&key={{item.key}}'>Edit</a></td>
+        <td><a class='detail' href='{%url CommentController %}?op=details&key={{item.key}}'>Detail</a></td>
+        <td> <a class='delete' href='{%url CommentController %}?op=delete&key={{item.key}}'>Delete</a></td>
+    </tr>
+{% endfor %}
+</table>
+</div>
+<div class="postFooter">
+<div class="nav">
+{%ifequal previousIndex -1 %}{%else%}<a href="{%url CommentController %}?op=index&index={{previousIndex}}">Previous</a>{%endifequal%}
+ | {%ifequal nextIndex 0 %}{%else%}<a href="{%url CommentController %}?op=index&index={{nextIndex}}">Next</a>{%endifequal%}
+<h3><a href='{%url CommentController %}?op=edit'>New</a><h3>
+</div>
+</div>

@@ -1,0 +1,15 @@
+<div class="post">
+   <div class="postHeader"><h1>{{link.Content.Title}}</h1></div>
+   <div class="fb-like" style="margin-left: 10px;" data-href="http://{{current_server}}/cms/page/{{link.AddressName}}" data-send="true" data-width="450" data-show-faces="true"></div>
+   <div class="postContent">
+        {%autoescape off%}{{link.Content.HTMLContent}}{%endautoescape%}
+   </div>    
+   <div class="postFooter">
+   		<div class="nav">
+   			Created by {{link.Content.Creator.Name}} {{link.Content.Creator.Surname}} on {{link.Content.DateCreated}}
+   		</div>
+   </div>
+   <div class="postComments">
+   		<div class="fb-comments" data-href="http://{{current_server}}/cms/page/{{link.AddressName}}" data-num-posts="5" data-width="500"></div>
+   </div>
+</div>

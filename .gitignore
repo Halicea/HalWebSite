@@ -1,0 +1,10 @@
+Docs
+docs
+.idea
+db.rdbms
+*.log
+*.htmldict
+#.project
+#.pydevproject
+.settings
+*.pyc

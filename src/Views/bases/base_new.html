@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>{%block title%}Hal Web Framework{%endblock%}</title>
+	{%block styles%}
+    <link href="/styles/Style.css" rel="stylesheet" type="text/css" />
+	{%endblock%}
+	{%block scripts%}    
+	{%endblock%}
+	{% block analitics %}
+	<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+
+	</script>
+	<script type="text/javascript">
+	try {
+	var pageTracker = _gat._getTracker("UA-5724164-2");
+	pageTracker._trackPageview();
+	} catch(err) {}</script>
+	{%endblock%}
+</head>
+<body id="home">
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+		  var js, fjs = d.getElementsByTagName(s)[0];
+		  if (d.getElementById(id)) {return;}
+		  js = d.createElement(s); js.id = id;
+		  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=198926386798932";
+		  fjs.parentNode.insertBefore(js, fjs);
+	  }(document, 'script', 'facebook-jssdk'));
+	</script>
+	    <div id="container">
+        <div id="header">
+            <div class="header-left">
+            </div>
+            <div class="header">
+                <div id="logo" class="logo">
+					{%block top_logo%}
+                    <img alt="logo" src="/images/logo.png" />
+					{%endblock%}
+                </div>
+                <div id="search" style="position: absolute; left: 400px; top: 40px;">
+                    <input id="Text1" type="text" style="width: 200px; vertical-align: middle; border: 1px solid Gray;
+                        background-color: White; height: 18px" />
+                    <a class="btn" style="vertical-align: middle; margin-left: -5px;" id="A1">Search
+                    </a>
+                    <img src="/images/logo_google.png" style="vertical-align: bottom;" alt="" />
+                </div>
+                <div id="login">
+					{% block login_menu %}
+						{% if current_user %}
+						<label style="color: navy">{{current_user.Name}} {{current_user.Surname}} </label>
+						<a href="{% url LogoutController %}" style="text-align: right; color: black;">Logout</a>
+						{% else %}
+						<a href="{% url LoginController %}" style="text-align: right; color: black;">Login</label> </a>
+						{% endif %}
+					{% endblock %}
+                </div>
+                <div id="menu">
+					{%block top_menu %} 
+                    <ul>
+                        <li><a class="active" href="index.htm">Home</a></li>
+                        <li><a href="#">Post</a></li>
+                        <li><a href="news.htm">News</a></li>
+                        <li><a href="dictionary.htm">Dictionary</a></li>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Links</a></li>
+                        <li><a href="#">User</a></li>
+                        <li><a href="#">Accounting</a></li>
+                        <li><a href="wishlist.htm">Wish List</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+					{% endblock %}
+                </div>
+            </div>
+            <div class="header-right">
+            </div>
+        </div>
+        <div id="content">
+            <div id="content-top">
+                <div id="shadowTopLeft">
+                </div>
+                <div id="shadowTopMiddle">
+                </div>
+                <div id="shadowTopRight">
+                </div>
+            </div>
+            <div id="content-middle">
+                <div id="shadowMiddleLeft">
+                    <div id="shadowMiddleRight">
+                        <div id="dataDiv">
+							<div id="postData">
+                                {% block status %}
+								Status
+                                {% endblock %}
+                                {% block content %}
+                                <div class="post">
+                                    <div class="postHeader">
+                                        <h1>
+                                            Влашка фудбалска репрезентација</h1>
+                                        <img src="img/football.png" alt="" />
+                                    </div>
+                                    <div class="postContent">
+                                        <p>
+                                            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                            euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad
+                                            minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip
+                                            ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
+                                            velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero
+                                            eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit
+                                            augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend
+                                            option congue nihil imperdiet doming id quod mazim placerat facer possim assum.
+                                            Typi non habent claritatem insitam; est usus legentis in iis qui facit eorum claritatem.
+                                            Investigationes demonstraverunt lectores legere me lius quod ii legunt saepius.
+                                            Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.
+                                            Mirum est notare quam littera gothica, quam nunc putamus parum claram, anteposuerit
+                                            litterarum formas humanitatis per seacula quarta decima et quinta decima. Eodem
+                                            modo typi, qui nunc nobis videntur parum clari, fiant sollemnes in futurum.
+                                            <br />
+                                            <br />
+                                            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                            euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad
+                                            minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip
+                                            ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
+                                            velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero
+                                            eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit
+                                            augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend
+                                            option congue nihil imperdiet doming id quod mazim placerat facer possim assum.
+                                            Typi non habent claritatem insitam; est usus legentis in iis qui facit eorum claritatem.
+                                            Investigationes demonstraverunt lectores legere me lius quod ii legunt saepius.
+                                            Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.
+                                            Mirum est notare quam littera gothica, quam nunc putamus parum claram, anteposuerit
+                                            litterarum formas humanitatis per seacula quarta decima et quinta decima. Eodem
+                                            modo typi, qui nunc nobis videntur parum clari, fiant sollemnes in futurum.
+                                        </p>
+                                    </div>
+                                    <div class="postFooter">
+                                        Posted by <a>Kosta</a> on 10/Jan/23 <a class="commentLink">Comments</a> Times Read
+                                        36
+                                    </div>
+                                </div>
+                                <div class="post">
+                                    <div class="postHeader">
+                                        <h1>
+                                            Кошарка да не речам баскет</h1>
+                                        <img src="img/Basketball.png" alt="" />
+                                    </div>
+                                    <div class="postContent">
+                                        <p>
+                                            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                            euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad
+                                            minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip
+                                            ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
+                                            velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero
+                                            eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit
+                                            augue duis dolore te feugait nulla facilisi. Nam liber tempor cum soluta nobis eleifend
+                                            option congue nihil imperdiet doming id quod mazim placerat facer possim assum.
+                                            Typi non habent claritatem insitam; est usus legentis in iis qui facit eorum claritatem.
+                                            Investigationes demonstraverunt lectores legere me lius quod ii legunt saepius.
+                                            Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum.
+                                            Mirum est notare quam littera gothica, quam nunc putamus parum claram, anteposuerit
+                                            litterarum formas humanitatis per seacula quarta decima et quinta decima. Eodem
+                                            modo typi, qui nunc nobis videntur parum clari, fiant sollemnes in futurum.
+                                        </p>
+                                    </div>
+                                    <div class="postFooter">
+                                        Posted by <a>Kosta</a> on 10/Jan/23 <a class="commentLink">Comments</a> Times Read
+                                        36
+                                    </div>
+                                </div>
+                                {% endblock %}
+                            </div>
+                            <div id="sidebar-posts">
+								{% block sidebar %}
+                                <div class="sidebar-post">
+                                    <h1>
+                                        Најнови постови</h1>
+                                    <div class="sidebar-content">
+                                        <h1>
+                                            Влашка фудбалска репрезентација</h1>
+                                        <p>
+                                            Турнир во мал фудбал во чест на Тоше Проески... &nbsp;&nbsp; <a href="#">Повеќе</a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="sidebar-post">
+                                    <h1>
+                                        Најчитани постови</h1>
+                                    <div class="sidebar-content">
+                                        <h1>
+                                            Влашка фудбалска репрезентација</h1>
+                                        <p>
+                                            Турнир во мал фудбал во чест на Тоше Проески... &nbsp;&nbsp; <a href="#">Повеќе</a>
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="content-bottom">
+                    <div id="shadowBottomLeft">
+                    </div>
+                    <div id="shadowBottomMiddle">
+                    </div>
+                    <div id="shadowBottomRight">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <img alt="" src="/images/appengine.gif" />
+            <p>
+                ©2011 <a href="http://www.halicea.com">www.halicea.com</a> Created By Costa Mihaylov Halicea.
+            </p>
+        </div>
+ <!--        <div id="comments">
+            <div id="commentsHeader">
+                <a class="btnClose" onclick="$.modal.close();">X</a>
+            </div>
+            <h3>
+                1 коментар-и:
+            </h3>
+            <div id="commentsContent">
+                <div class="comment">
+                    <div class="commentHeader">
+                        <h4>
+                            Некаков коментар бла бла бла</h4>
+                    </div>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                        euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad
+                        minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip
+                        ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
+                        velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero
+                        eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit
+                        augue duis dolore te feugait nulla facilisi.
+                    </p>
+                    <div class="commentFooter" style="color: #bdd6ec">
+                        Posted by <a>Kosta</a> on 10/Jan/23
+                    </div>
+                </div>
+            </div>
+            <div class="commentAdd">
+                <p>
+                    Додади коментар</p>
+                <textarea id="textA" cols="20" rows="2" style="width: 350px; height: 150px;"></textarea>
+                <div style="margin-top: 10px;">
+                    <a class="btn" id="Submit">Внеси </a>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<div class="postHeader"><h1>Comment: </h1></div>
+<div class="postContent">
+    <form id='CommentForm' method='post' action='{% url CommentController %}'>
+        <input type='hidden' name='op' value={{op}}>
+        <input type='hidden' name='key' value={{CommentForm.instance.key}}></input>
+        <table>
+        {% for field in CommentForm %}
+            <tr>
+                <td style="text-align:right;">
+                    {{ field.label_tag }}:
+                </td>
+                <td>
+                    {{ field }}
+                </td>
+                <td style='color: red;'>
+                    {{ field.errors }}
+                </td>
+            <tr>
+        {% endfor %}
+        </table>
+        <input type='submit' value={%if CommentForm.instance.key%} 'Update' {% else %} 'Create' {%endif%}></input>
+    </form>
+</div>
+<div class="postFooter">
+    <div class="nav">
+    <a href='{%url CommentController%}'>Back</a>
+    </div>
+</div>

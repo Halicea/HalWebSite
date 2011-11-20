@@ -1,0 +1,25 @@
+<script type="text/javascript">
+    $(function(){
+        $('#bntInvitationSubmit').click(function(){
+            var v = $('#id_Email').val();
+            $.ajax({
+                type:'POST',
+                url:'{%url InvitationController%}',
+                data:"{'email':'"+v+"'}",
+                dataType:'json',
+                contentType:'application/json',
+                success:function(res){
+                    alert(res);
+                },
+                error:function(err, oth){
+                    alert(err);
+                }
+            });
+            return false;
+        });
+    });
+</script>
+<form id="invitationForm" method="POST" action="{%url InvitationController%}">
+    {{InvitationFormK}}
+    <input type="submit" value="Save" id="bntInvitationSubmit">
+</form>

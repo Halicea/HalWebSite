@@ -1,0 +1,13 @@
+<h2>WishList List: </h2>
+<table>
+{% for item in WishListList %}
+    <tr>
+        <td>
+            {{item}}
+        </td>
+        <td><a class='detail' href='{%url WishListController %}?op=shw&key={{item.key}}'>Detail</a></td>
+        <td> <a class='delete' href='{%url WishListController %}?op=del&key={{item.key}}'>Delete</a></td>
+    </tr>
+{% endfor %}
+</table>
+<h3><a href='{%url WishListController %}?op=shw'>New</a><h3>

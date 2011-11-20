@@ -1,0 +1,21 @@
+<h2>RoleAssociation: </h2>
+<form id='RoleAssociationForm' method='post' action='{% url RoleAssociationController %}'>
+    <input type='hidden' name='op' value={{op}}>
+    <input type='hidden' name='key' value={{RoleAssociationForm.instance.key}}></input>
+<table>
+{% for field in RoleAssociationForm %}
+    <tr>
+        <td style="text-align:right;">
+            {{ field.label_tag }}:
+        </td>
+        <td>
+            {{ field }}
+        </td>
+        <td style='color: red;'>
+            {{ field.errors }}
+        </td>
+    <tr>
+{% endfor %}
+</table>
+<input type='submit' value={%if RoleAssociationForm.instance.key%} 'Update' {% else %} 'Create' {%endif%}></input>
+</form>

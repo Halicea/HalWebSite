@@ -1,0 +1,13 @@
+<h2>Role List: </h2>
+<table>
+{% for item in RoleList %}
+    <tr>
+        <td>
+            {{item}}
+        </td>
+        <td><a class='detail' href='{%url RoleController %}?op=shw&key={{item.key}}'>Detail</a></td>
+        <td> <a class='delete' href='{%url RoleController %}?op=del&key={{item.key}}'>Delete</a></td>
+    </tr>
+{% endfor %}
+</table>
+<h3><a href='{%url RoleController %}?op=shw'>New</a><h3>

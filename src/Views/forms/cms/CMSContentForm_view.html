@@ -1,0 +1,26 @@
+<div class="post">
+   <div class="postHeader"><h1>{{Content.Title}}</h1></div>
+   <div class="postContent">
+        {%autoescape off%}{{Content.HTMLContent}}{%endautoescape%}
+   </div>    
+   <div class="postFooter">
+   		{%ifeq Content.Creator.key current_user.key}
+   		<div></div>
+   		<div class="nav">
+   			Created by {{Content.Creator.Name}} {{Content.Creator.Surname}} on {{Content.DateCreated}}
+   		</div>
+   		<div>
+   			<h3>Links:</h3>
+   			{%if Content.Links%}
+   			<ul class="content-links" for="{{Content.key}}">
+   				{%for l in Content.get_links%}
+   					<li><a href="/cms/page/{{l.addressName}}">l.Name</a></li>TODO:[Delete|Edit]
+   				{%endfor%}
+   			</ul>
+   			{%else%}
+   				No Links Available:
+   				<a href="{%url LinksController%}?key={{l.key}}">_(Publish this Content)</a>
+   			{%endif%}
+   		</div>
+   </div>
+</div>

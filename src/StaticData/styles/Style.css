@@ -1,0 +1,561 @@
+﻿html, body
+{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f6f6f7;
+    font-family: Verdana, arial,sans-serif;
+    font-size: 9pt;
+    color: #666;
+}
+
+/*container: gi sodrzi: header, content, footer, comment(popup komentar) klasite*/
+#container
+{
+    position: relative;
+    margin: 0 auto;
+    width: 1000px;
+    background: #f6f6f7;
+    height: auto !important;
+}
+
+/*header*/
+/*-------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+#header
+{
+    position: relative;
+    height: 155px;
+}
+
+.header
+{
+    height: 121px;
+    background: url('/images/header-middle.jpg') repeat-x bottom;
+    float: left;
+    width: 949px;
+}
+.header-left
+{
+    height: 121px;
+    background: url('/images/header-left.jpg') no-repeat bottom;
+    float: left;
+    width: 25px;
+}
+.header-right
+{
+    height: 121px;
+    background: url('/images/header-right.jpg') no-repeat bottom;
+    float: left;
+    width: 25px;
+}
+
+.logo
+{
+    position: absolute;
+    left: 60px;
+    top: 25px;
+}
+
+#login
+{
+    display: table-cell;
+    vertical-align: bottom;
+    color: White;
+    position: absolute;
+    height:60px;
+    right: 30px;
+    top: 60px;
+    text-align: center;
+    font-weight: bold;
+}
+#login img{
+    vertical-align: bottom;
+    float: left;
+    bottom: 0px;
+    width: 40px;
+}
+#login label,
+#login a{
+    position: relative;
+    bottom: -25px;
+    right: 0px;
+}
+#login a
+{
+    color: White;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 11px;
+}
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+
+/*menu - gi sodrzi glavnite linkovi do stranite: index, news...*/
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+#menu
+{
+    position: absolute;
+    width: 675px;
+    height: 39px;
+    left: 310px;
+    top: 103px;
+    background-color: White;
+    border-bottom: 1px solid #555555;
+    border-right: 1px solid #555555;
+    border-top: 1px solid #555555;
+    background-color: White;
+    color: #222222;
+}
+
+/*
+#menu ul
+{
+    margin: 0;
+    padding: 0px;
+    list-style: none;
+    line-height: normal;
+    margin-left: 0px;
+}
+
+#menu li
+{
+    display: inline;
+    text-align: center;
+}
+
+#menu a
+{
+    background-position: top;
+    display: block;
+    float: left;
+    height: 28px;
+    margin-right: 0px;
+    padding: 12px 10px 0px 10px;
+    text-decoration: none;
+    text-align: center;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #383B3F;
+}
+
+#menu a:hover, #menu .active
+{
+    background: #171717 url('/images/menuShadow.png') repeat-x bottom;
+    color: White;
+    cursor: pointer;
+}
+/*/
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+/*content - gi sodrzi glavnite sodrzini*/
+
+#content
+{
+    background-color: #dbe3ea;
+    width: 998px;
+    margin: 0 auto;
+    position: relative;
+}
+
+#content-top
+{
+    clear: both;
+    height: 25px;
+}
+
+/*-------------------------------------------------------------------*/
+#shadowTopMiddle
+{
+    height: 25px;
+    background: url('/images/shadow-top-middle.jpg') repeat-x top;
+    float: left;
+    width: 948px;
+}
+
+#shadowTopLeft
+{
+    height: 25px;
+    background: url('/images/shadow-top-left.jpg') no-repeat top;
+    float: left;
+    width: 25px;
+}
+
+#shadowTopRight
+{
+    height: 25px;
+    background: url('/images/shadow-top-right.jpg') no-repeat top;
+    float: left;
+    width: 25px;
+}
+
+#shadowBottomMiddle
+{
+    height: 25px;
+    background: url('/images/shadow-bottom-middle.jpg') repeat-x;
+    float: left;
+    width: 948px;
+}
+
+#shadowBottomLeft
+{
+    height: 25px;
+    background: url('/images/shadow-bottom-left.jpg') no-repeat;
+    float: left;
+    width: 25px;
+}
+
+#shadowBottomRight
+{
+    height: 25px;
+    background: url('/images/shadow-bottom-right.jpg') no-repeat;
+    float: left;
+    width: 25px;
+}
+
+/*-------------------------------------------------------------------*/
+
+/*main content*/
+#content-middle
+{
+    clear: both;
+}
+
+
+#shadowMiddleLeft
+{
+    background: url('/images/shadow-left.jpg') repeat-y scroll left center transparent;
+    padding-left: 25px;
+    float: left;
+}
+
+#shadowMiddleRight
+{
+    background: url('/images/shadow-right.jpg') repeat-y scroll right center transparent;
+    padding-right: 25px;
+    float: left;
+}
+
+/*dataDiv - gi sodrzi postData(delot so glavnite postovi) i sideBarPost(delot desno)*/
+#dataDiv
+{
+    height: 100%;
+    width: 948px;
+}
+
+#postData
+{
+    width: 700px;
+    background-color: White;
+    border-left: 1px solid #baccd9;
+    border-right: 1px solid #baccd9;
+    border-top: 1px solid #baccd9;
+    float: left;
+}
+
+/*post: gi sodrzi postHeader, postContent i postFooter*/
+/*-------------------------------------------------------------------*/
+.post
+{
+    padding: 10px;
+    border-bottom: 1px solid #baccd9;
+}
+
+.postHeader
+{
+    float: inherit;
+}
+
+.postHeader h1
+{
+    float: left;
+    margin-top: 5px;
+}
+
+.postHeader img
+{
+    float: left;
+    padding-left: 10px;
+    margin-top: -5px;
+}
+
+.postContent > p,
+.postContent > table,
+.postContent > form,
+.postContent > div
+{
+    clear: both;
+    margin-top: -5px;
+}
+
+.postFooter
+{
+    color: #367dbe;
+    font-size: 9px;
+    text-align: right;
+}
+.nav{
+    float: left;
+}
+.postFooter a,
+.nav a
+{
+    color: #367dbe;
+    font-size: 9px;
+    text-align: right;
+    text-decoration: underline;
+}
+.postFooter a:hover,
+.nav a:hover
+{
+    cursor: pointer;
+    color: #447399;
+}
+input[type=button],
+input[type=submit]{
+    width:180px;
+    height: 50px;
+    padding: 10px 10px 10px 10px;
+    text-decoration: none;
+    text-align: center;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #383B3F;
+}
+input[type=text],
+input[type=password],
+select{
+    height: 25px;
+    width:173px;
+    padding: 2px 2px 2px 2px;
+    cursor: default;
+    text-decoration: none;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #0A246A;
+}
+select{
+    width:180px;
+    height: 30px;
+}
+/*input[type=button]:hover,*/
+/*input[type=submit]:hover{*/
+    /*background-color: #808080;*/
+/*}*/
+#postData h1
+{
+    color: #24547f;
+    font-size: 15px;
+    padding: 0px;
+}
+/*-------------------------------------------------------------------*/
+
+/*sidebar-posts: delot desno koj gi sodrzi sidebar-post klasite (najnovi postovi, najcitani...)*/
+/*-------------------------------------------------------------------*/
+#sidebar-posts
+{
+    float: left;
+    margin-left: 15px;
+    width: 212px;
+}
+
+/*sidebar-post: klasa za eden post (sidebar-content)*/
+/*-------------------------------------------------------------------*/
+.sidebar-post
+{
+    background: #b8c8d5 url('/images/sidebar-post-header.jpg') repeat-x top;
+    width: 210px;
+    padding: 0px 8px 8px 8px;
+    border: 1px solid #9ebdd4;
+    margin-bottom: 15px;
+}
+
+.sidebar-post h1
+{
+    color: #61717f;
+    font-size: 13px;
+    padding: 0px;
+}
+
+.sidebar-content
+{
+    background-color: White;
+    padding: 1px 5px 5px 5px;
+}
+
+.sidebar-content h1
+{
+    font-family: Verdana, arial,sans-serif;
+    color: #61717f;
+    font-size: 11px;
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
+.sidebar-content p
+{
+    color: #222225;
+    font-size: 10px;
+    margin-top: 0px;
+    padding: 3px 0px 0px 0px;
+}
+
+
+.sidebar-content а
+{
+    color: #2562a1;
+    font-size: 10px;
+}
+/*-------------------------------------------------------------------*/
+
+#content-bottom
+{
+    clear: both;
+    height: 25px;
+}
+
+
+.commentLink
+{
+}
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+
+
+/*comments - popup prozor koj se pojavuva za vnesuvanje komentari*/
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+#comments
+{
+    display: none;
+    text-align: left;
+    max-height: 600px;
+    overflow: auto;
+    padding: 10px 20px 20px 20px;
+    background-color: #3d678d;
+    border: 1px solid #86aaca;
+}
+
+#commentsHeader
+{
+    padding-bottom: 20px;
+}
+
+#comments h3
+{
+    padding: 0px;
+    color: white;
+    margin: 0px;
+}
+
+#comments h4
+{
+    padding: 0px;
+    margin: 3px;
+}
+
+.comment
+{
+    max-width: 700px;
+    text-align: left;
+    border: #4777a3 solid 1px;
+    margin-top: 10px;
+    background-color: #426f97;
+    color: White;
+}
+.commentHeader
+{
+    height: 20px;
+    border-bottom: 1px solid #4777a3;
+    padding: 3px;
+    background: url('/images/gradient.png') repeat-x top;
+   
+}
+
+.commentFooter
+{
+    color: #bdd6ec;  
+    font-size: 9px;
+    text-align: right; 
+    padding:5px; 
+}
+
+.commentFooter a
+{
+    color: #dceaf5;
+    text-decoration:underline;
+}
+
+.commentFooter a:hover
+{
+    cursor:pointer;
+}
+
+.comment p
+{
+    padding: 10px;
+}
+
+.commentAdd
+{
+    text-align: left; 
+    color: White; 
+    font-weight: bold;
+}
+
+
+.btn
+{
+    color: #262626;
+    text-align: center;
+    border: 1px solid Gray;
+    cursor: pointer;
+    padding: 3px 5px 3px 5px;
+    font-weight: bold;
+    background: #dbe3ea url('/images/gradient.png') repeat-x top;
+    display: inline-block;
+}
+
+.btn:hover
+{
+    background-color: #b5c8d7;
+    cursor: pointer;
+}
+
+.btnClose
+{
+    color: #86aaca;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+    border: 1px solid #86aaca;
+    padding: 1px 3px 1px 3px;
+}
+
+.btnClose:hover
+{
+    background-color: #5f88a9;
+    cursor: pointer;
+}
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+#footer
+{
+    position: relative;
+    margin-top: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+    padding: 10px 0px 10px 0px;
+    color: #222222;
+}

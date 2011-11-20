@@ -1,0 +1,43 @@
+application: halwebsite
+version: 1
+runtime: python
+api_version: 1
+
+builtins:
+- datastore_admin: on
+
+handlers:
+- url: /styles
+  static_dir: StaticData/styles
+  
+- url: /styles/images
+  static_dir: StaticData/styles/images
+
+- url: /images
+  static_dir: StaticData/images
+  
+- url: /jscripts
+  static_dir: StaticData/jscripts
+  
+- url: /favicon\.ico
+  static_files: StaticData/images/favicon.ico
+  upload: StaticData/images/favicon\.ico
+#Remote API
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin  
+
+#App Stats  
+- url: /stats.*
+  script: Apps/appstats.py
+  login: admin
+  
+#Admin
+- url: /admin/.*
+  script: Apps/admin.py
+  login: admin
+
+#TheRest
+- url: /.*
+  script: Apps/base.py
+

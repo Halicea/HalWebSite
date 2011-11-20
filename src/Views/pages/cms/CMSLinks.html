@@ -1,0 +1,88 @@
+{%extends base %}
+{%block styles%}
+{{block.super}}
+<link href="/styles/Style.css" rel="stylesheet" type="text/css" />
+{%endblock%}
+{%block scripts%}
+{{block.super}}
+<link rel="stylesheet" href="/jscripts/jquery.treeview/jquery.treeview.css" />
+<script src="/jscripts/jquery.cookie.js" type="text/javascript"></script>
+<script src="/jscripts/jquery.treeview/jquery.treeview.js" type="text/javascript"></script>
+<script src="/jscripts/jquery.synctranslit.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+		$(function() {
+			$("#tree").treeview({
+				collapsed: false,
+				animated: "medium",
+				control:"#sidetreecontrol",
+				persist: "location"
+			});
+			$('#frmNewLink').ajaxForm(function(data){
+				$('#divTree').fadeOut('slow');
+				$.post("/cms/links?op=LinksTree", function(treedata){
+					$('#divStatus').html(data);
+					$('#divStatus').fadeOut('fast');
+					$('#divTree').html(treedata);
+					$('#divTree').fadeIn('fast');
+                    $('#divStatus').fadeOut(5000);
+                });
+			});
+			$('#selContent').change(function(){
+				var name = $(this).find("option:selected").text();
+                //$("#addressName").val(name);
+				$('#addressName').syncTranslit({destination: 'addressName'});
+				$('#addressName').trigger('keyup');
+				$("#linkName").val(name);
+			});
+			$('#selContent').trigger('change');
+		})
+	</script>
+
+{%endblock%}
+{% block content %}
+<div class="post">
+    <h2>New Link:
+    <input type="BUTTON" class="smallBtn" value="Add New Content" onclick="newContentDialog(); return false;"/>
+    <input type="BUTTON" class="smallBtn"  value="Show Menu" onclick="showMenu(); return false;"/>
+   </h2> 
+    <form action="" method="post" id="frmNewLink">
+		<input type="hidden" name="op" value="save"></input>
+		<div style="width:100%;min-height:150px; display: block;">
+		<div style="float:left; text-align: right;">
+			<table>
+				<tr>
+					<td>Content:</td>
+					<td>
+						<select name="content" id="selContent">
+							{% for cont in  contents %}
+							<option value="{{cont.key}}">{{cont.Title}}</option>
+							{% endfor %}
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Url Name:</td>
+					<td><input type="text" name="addressName" id="addressName"></input></td>
+				</tr>
+				<tr>
+					<td>Name</td>
+					<td><input type="text" name="name" id="linkName"></input></td>
+				</tr>
+				<tr>
+					<td>Display Order</td>
+					<td><select name="order"><option>1</option><option>2</option><option>3</option><option>4</option></select></td>
+				</tr>
+			</table>
+		</div>
+		<div id="divTree" style="float: left">
+	    	{%include LinksTree %}
+		</div>
+        <div id="divMenus">
+            {%comment%}include MenuTree{%endcomment%}
+        </div>
+        <div style="clear: both;"></div>
+		</div>
+    	<input type="submit" value="Save"></input>
+	</form>
+</div>
+{% endblock %}

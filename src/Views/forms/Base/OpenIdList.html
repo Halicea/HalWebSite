@@ -1,0 +1,8 @@
+{%if oidProviders%}
+<b>Or Login with:</b>
+<ul style="margin:0;padding:0;list-style-type:none;margin:auto;font-size:small">
+    {%for oidItem in oidProviders%} 
+    <li style='float:left;'><p><a href="{{oidItem.Url}}"><img src='{{oidItem.ImageUrl}}' />Login With {{oidItem.Name}}</a></p></li>
+    {%endfor%}
+</ul>
+{%endif%}

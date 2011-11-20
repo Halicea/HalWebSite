@@ -1,0 +1,14 @@
+{% extends base %}
+{% block content %}
+<div class="post">
+<table>
+{% for item in items %}
+    <tr>
+        <td>
+            {{item}}
+        </td>
+    </tr>
+{% endfor %}
+</table>
+</div>
+{%endblock%}

@@ -1,0 +1,23 @@
+{%block styles %}
+{{block.super}}
+<link href="/styles/superfish.css" rel="stylesheet" type="text/css" media="screen" />
+{% endblock %}
+
+{% block scripts %}
+{{block.super}}
+<script type="text/javascript" src="/jscripts/hoverIntent.js" ></script>
+<script type="text/javascript" src="/jscripts/superfish.js" ></script>
+<script language="text/javascript">
+$(document).ready(function() {
+    $('ul.sf-menu').superfish();
+});
+</script>
+{% endblock %}
+{% comment %}
+<!-- <link href="/styles/jqueryslidemenu/jqueryslidemenu.css" rel="stylesheet" type="text/css" media="screen" />
+<script type="text/javascript" src="/jscripts/jqueryslidemenu.js" ></script>
+ -->
+{% endcomment %}
+    <ul class="sf-menu">
+    	<li><a href="/">Home</a></li>
+    </ul>

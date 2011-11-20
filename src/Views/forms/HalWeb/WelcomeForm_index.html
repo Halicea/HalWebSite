@@ -1,0 +1,22 @@
+<div class="postHeader"><h1>Welcome List: </h1></div>
+<div class="postContent">
+<table>
+{% for item in WelcomeList %}
+    <tr>
+        <td>
+            {{item}}
+        </td>
+        <td><a class='detail' href='{%url WelcomeController %}?op=edit&key={{item.key}}'>Edit</a></td>
+        <td><a class='detail' href='{%url WelcomeController %}?op=details&key={{item.key}}'>Detail</a></td>
+        <td> <a class='delete' href='{%url WelcomeController %}?op=delete&key={{item.key}}'>Delete</a></td>
+    </tr>
+{% endfor %}
+</table>
+</div>
+<div class="postFooter">
+<div class="nav">
+{%ifequal previousIndex -1 %}{%else%}<a href="{%url WelcomeController %}?op=index&index={{previousIndex}}">Previous</a>{%endifequal%}
+ | {%ifequal nextIndex 0 %}{%else%}<a href="{%url WelcomeController %}?op=index&index={{nextIndex}}">Next</a>{%endifequal%}
+<h3><a href='{%url WelcomeController %}?op=edit'>New</a><h3>
+</div>
+</div>
