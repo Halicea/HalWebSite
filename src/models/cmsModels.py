@@ -40,26 +40,34 @@ class ContentType:
     CMSPage = 0
     StaticPage = 1
     NoContent = 2 
-
 class CMSLink(db.Model):
     AddressName = db.StringProperty(required=True)
+    AdditionalUrl = db.StringProperty()
     Name = db.StringProperty(required=True)
     ParentLink = db.SelfReferenceProperty(collection_name='parent_link_cms_links')
-    Depth = db.IntegerProperty(required=True, default=0)
+    Depth = db.IntegerProperty(required=True, default=-1)
     Order = db.IntegerProperty(required=True, default=100)
-    Content = db.ReferenceProperty(reference_class=CMSContent, collection_name='content_cms_links')
+    Content = db.ReferenceProperty(required=False, default=None, reference_class=CMSContent, collection_name='content_cms_links')
     Creator = db.ReferenceProperty(Person, collection_name='creator_cms_links')
     ContentTypeNumber = db.IntegerProperty(default = 0)
     DateCreated =db.DateTimeProperty(auto_now_add=True)
     LastDateModified =db.DateTimeProperty(auto_now=True)
+    
     def GetChildren(self):
         return CMSLink.gql("WHERE Depth =:depth AND ParentLink =:pl", depth=self.Depth+1, pl=self).fetch(limit=1000)
+
     def Url(self):
-        result=self.AddressName
-        cur_ln = self.ParentLink
-        while cur_ln and len(cur_ln)>0:
-            result = cur_ln[0].AddressName+'/'+result
-        return result
+        if self.ContentTypeNumber == ContentType.CMSPage:
+            result=self.AddressName
+            cur_ln = self.ParentLink
+            while cur_ln:
+                #we can skip some url parts by setting some link with No address but this is not safe
+                if cur_ln.AddressName:
+                    result = cur_ln.AddressName+'/'+result
+                cur_ln = cur_ln.ParentLink
+            return result
+        else:
+            return self.AdditionalUrl
     def GetTreeBelow(self):
         children = self.GetChildren()
         result = {}
@@ -67,15 +75,22 @@ class CMSLink(db.Model):
             result[child] = child.GetTreeBelow()
         return result
     def delete(self):
-        self.Content.Links.remove(self.key())
-        self.Content.HasLinks = len(self.Content.Links)>0
-        self.Content.put()
-        super(CMSLink,self).remove()
+        if self.Content:
+            self.Content.Links.remove(self.key())
+            self.Content.HasLinks = len(self.Content.Links)>0
+            self.Content.put()
+        #delete all the menus dependent on this links
+        menus = self.linkroot_menus.fetch(10)
+        if menus:
+            db.delete(menus)
+        super(CMSLink,self).delete()
+        return "Link Deleted"
     def put(self):
         super(CMSLink, self).put()
-        self.Content.Links.append(self.key())
-        self.Content.HasLinks=True
-        self.Content.put()
+        if self.Content:
+            self.Content.Links.append(self.key())
+            self.Content.HasLinks=True
+            self.Content.put()
     @classmethod
     def GetLinkByPath(cls, path):
         items = [p for p in path.split('/') if p]
@@ -98,48 +113,78 @@ class CMSLink(db.Model):
     def GetLinksByDate(dateFrom, dateTo):
         return CMSLink.gql("WHERE LastDateModified > :ldf AND LastDateModified < :ldt ORDER BY LastDateModified ASC", ldf=dateFrom, ldt=dateTo).fetch(1000)
     @classmethod
-    def CreateNew2(cls, addressName, name, parentLink, order, content, creator, _isAutoInsert=False):
+    def CreateNew2(cls, addressName, name, parentLink, order, content, contentType, creator, _isAutoInsert=False):
         if not parentLink:
-            depth = 0
+            depth = -1
         else:
             depth = parentLink.Depth+1
-        result = cls(AddressName=addressName, Name=name, ParentLink=parentLink, Depth=depth, Order=order, Content=content, Creator=creator)
+        additionalUrl = None
+        if contentType == ContentType.StaticPage:
+            additionalUrl = addressName
+            addressName = name
+        if contentType==ContentType.NoContent:
+            additionalUrl = ""
+        result = cls(key_name=addressName, AddressName=addressName, 
+                     AdditionalUrl=additionalUrl, Name=name, ContentTypeNumber=contentType, 
+                     ParentLink=parentLink, Depth=depth, Order=order, 
+                     Content=content, Creator=creator)
         if _isAutoInsert: result.put()
         return result
-    
     @classmethod
-    def GetLinkTree(cls):
-        tree = cls.gql('WHERE Depth =:d', d=0).fetch(limit=1000, offset=0)
-        result = {} 
-        # get the root nodes
-        for t in tree:
-            result[t] = t.GetTreeBelow()
-        return result
+    def GetLinkTree(cls, menu='cms'):
+        root = CMSLink.get_by_key_name(menu)
+        if not root:
+            root = CMSLink.CreateNew2('/cms', 'Root', None, -1, None, None, _isAutoInsert=False)
+        return root.GetTreeBelow()
+#        tree = cls.gql('WHERE Depth =:d', d=-1).fetch(limit=1000, offset=0)
+#        result = {} 
+#        # get the root nodes
+#        for t in tree:
+#            result[t] = t.GetTreeBelow()
+#        return result
     ## End Static Methods
-
 class Menu(db.Model):
     Name = db.StringProperty(required = True)
-    Location = db.TextProperty(required = True)
+    LocationId = db.TextProperty(required = True)
     CssClass = db.StringProperty()
-    
-class Comment(db.Model):
-    """TODO: Describe Comment"""
-    Text= db.TextProperty(required=True, )
-    Creator= db.ReferenceProperty(Person, collection_name='creator_comments', )
-    DateAdded= db.DateTimeProperty(auto_now_add=True, )
-    Content= db.ReferenceProperty(CMSContent, collection_name='content_comments', required=True, )
+    LinkRoot = db.ReferenceProperty(CMSLink, collection_name='linkroot_menus')
     @classmethod
-    def CreateNew(cls ,text,creator,content , _isAutoInsert=False):
-        result = cls(
-                     Text=text,
-                     Creator=creator,
-                     Content=content,)
-        if _isAutoInsert: result.put()
-        return result
-    def __str__(self):
-        #TODO: Change the method to represent something meaningful
-        return 'Change __str__ method' 
-## End Comment
+    def CreateNew(cls, name, locationId, cssClass, creator, _isAutoInsert=False):
+        root = CMSLink.CreateNew2(name, name, None, -1, None, creator, _isAutoInsert=_isAutoInsert)
+        res = cls(Name=name, LocationId=locationId, CssClass = cssClass, LinkRoot=root)
+        if _isAutoInsert: res.put()
+        return res
+    @classmethod
+    def CreateFromLinkRoot(cls, name, locationId, cssClass, linkRoot,_isAutoInsert=False):
+        res = cls(key_name=name, Name=name, LocationId=locationId, CssClass = cssClass, LinkRoot=linkRoot)
+        if _isAutoInsert: res.put()
+        return res
+    def put(self):
+        self.LinkRoot.put()
+        super(Menu, self).put()
+    def delete(self):
+        self.LinkRoot.delete()
+        super(Menu, self).delete()
+    def to_list(self, params=None):
+        id, name, cl, style = str(self.key()), self.Name, '', ''
+        noroot = False
+        if params:
+            name, cl, style = params.name or self.Name, params.cl or cl, params.style or style 
+            noroot = False or params.noroot
+        template= "<ul id='menu_%(name)s' name='menu_%(name)s' class='%(class)s' style='%(style)s'>\n\t<li><a href='#' id='%(key)s'>Root</a><ul>%(rest)s<ul></li>\n</ul>"
+        result = "" 
+        for k in self.LinkRoot.parent_link_cms_links.fetch(10):
+            result+=self.__renderNode__(k, 2)
+        if noroot:
+            return result
+        else:
+            return template%{'id':id, 'name':name, 'style':style, 'class':cl,'key':str(self.LinkRoot.key()),'rest':result}
+    
+    def __renderNode__(self, node, spacer):
+        link = '\n'+('\t'*spacer)+"<li><a href='%(url)s' id='%(key)s'>%(name)s</a><ul>%(rest)s</ul></li>"
+        return link%{'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':'\n'.join([self.__renderNode__(x, spacer+1) for x in node.parent_link_cms_links])}
+
+
 class ContentTag(db.Model):
     TagName = db.StringProperty(required=True)
     Count = db.IntegerProperty(default=0)

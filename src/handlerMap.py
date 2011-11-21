@@ -34,6 +34,8 @@ webapphandlers = [
 ('/cms/page/(.*)', cmsControllers.CMSPageController.new_factory(op='view')),
 ('/cms/tag/(.*)', cmsControllers.CMSPageController.new_factory(op='index')),
 ('/', cmsControllers.CMSPageController.new_factory(op='index')),
+('/menu/(.*)', cmsControllers.MenuController),
+
 #{%endblock%}
 
 #{%block HalWebControllers%}

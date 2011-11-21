@@ -1,0 +1,18 @@
+{%for m in menus%}
+  <a href="#" class='expandme' name='{{m.Name}}' id="{{m.Name}}">{{m.Name}}</a>
+{%endfor%}
+<script type="text/javascript">
+$(function(){
+	$('.expandme').click(function(){
+		anch = $(this);
+		if(anch.next().attr('class')=='ul'){
+			anch.next().remove();
+		}else{
+			$.post('/menu/'+$(this).attr('id')+'?noroot=true',
+			function(data){
+				anch.after("<ul class='ul'>"+data+"</ul>")
+			});
+		}
+	});
+});
+</script>

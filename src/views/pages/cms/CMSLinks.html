@@ -10,50 +10,106 @@
 <script src="/jscripts/jquery.treeview/jquery.treeview.js" type="text/javascript"></script>
 <script src="/jscripts/jquery.synctranslit.min.js" type="text/javascript"></script>
 <script type="text/javascript">
-		$(function() {
-			$("#tree").treeview({
-				collapsed: false,
-				animated: "medium",
-				control:"#sidetreecontrol",
-				persist: "location"
-			});
-			$('#frmNewLink').ajaxForm(function(data){
-				$('#divTree').fadeOut('slow');
-				$.post("/cms/links?op=LinksTree", function(treedata){
-					$('#divStatus').html(data);
-					$('#divStatus').fadeOut('fast');
-					$('#divTree').html(treedata);
-					$('#divTree').fadeIn('fast');
-                    $('#divStatus').fadeOut(5000);
-                });
-			});
-			$('#selContent').change(function(){
+	var activeMenu = '{{menu.Name}}'; 
+	$(function() {		
+		setTree();
+		$('#frmNewLink').ajaxForm(function(data){
+			$('#divTree').html(data);
+			setTree();
+        });
+		$('#selContent').change(function(){
+			if($(this).find("option:selected").attr('type')=='static' ||
+			   !$("#isContent").is(':checked')){
+				$("#addressName").unbind("keyup");
+				$("#linkName").val("");
+				$("#addressName").val("");
+			}else{
 				var name = $(this).find("option:selected").text();
-                //$("#addressName").val(name);
-				$('#addressName').syncTranslit({destination: 'addressName'});
-				$('#addressName').trigger('keyup');
+                $("#addressNameHidden").val(name);
+                $('#addressNameHidden').syncTranslit({destination: 'addressName'});
+				$('#addressNameHidden').trigger('keyup');
+				$('#addressName').keyup(function(){
+					$("#addressNameHidden").val($('#addressName').val());
+					$('#addressNameHidden').trigger('keyup');
+				});
 				$("#linkName").val(name);
+			}
+		});
+		$('#selContent').trigger('change');
+		$('#isContent').change(function(){
+			if($("#isContent").is(':checked')){
+				$('#selContent').attr("disabled",false);
+				$('#selContent').show();
+				//$('#divTree').fadeIn();
+			}else{
+				$('#selContent').attr("disabled",true);
+				$('#selContent').hide();
+				//$('#divTree').fadeOut();
+			}
+		});
+	});
+	function getTree(menu){
+		$.post('/menu/'+activeMenu,
+		function(data){
+			$('#divTree').html(data);
+			setTree();
+		});
+	}
+	function setTree(){
+		var templ = "<input type='radio' name='parentLink' value='${key}'>"
+		var delTempl = "<a href='#' class='delNode'>delete</a>"
+		$("#menu_"+activeMenu+" li").each(function(){
+			var id = $(this).find("a").attr("id");
+			var t = templ.replace("${key}", id)
+			t = delTempl+t;
+			$(this).prepend(t);
+		});
+		$('.delNode').click(function(){
+			key = $(this).next().next().attr('id');
+			$.post('/cms/links?op=delete&key='+key,
+			function(data){
+				$('divStatus').html(data);
+				getTree();
+				setTree();
 			});
-			$('#selContent').trigger('change');
-		})
-	</script>
+		});
+		$("#menu_"+activeMenu).treeview({
+			collapsed: false,
+			animated: "medium",
+			control:"#sidetreecontrol",
+			persist: "location"
+		});
+	}
+	function showMenu(){
+		
+	}
+	function showContentDialog(){
+		
+	}
+	function newMenuDialog(){
+		
+	}
+</script>
 
 {%endblock%}
 {% block content %}
 <div class="post">
     <h2>New Link:
-    <input type="BUTTON" class="smallBtn" value="Add New Content" onclick="newContentDialog(); return false;"/>
-    <input type="BUTTON" class="smallBtn"  value="Show Menu" onclick="showMenu(); return false;"/>
+    <input type="BUTTON" class="btnSmall" value="Add New Content" onclick="newContentDialog(); return false;"/>
+    <input type="BUTTON" class="bntSmall"  value="Show Menu" onclick="showMenu(); return false;"/>
    </h2> 
     <form action="" method="post" id="frmNewLink">
 		<input type="hidden" name="op" value="save"></input>
+		<input type="hidden" name="menu" value="{{menu.Name}}"></input>
 		<div style="width:100%;min-height:150px; display: block;">
 		<div style="float:left; text-align: right;">
 			<table>
 				<tr>
 					<td>Content:</td>
 					<td>
+						<input id="isContent" type="checkbox" value="true" checked="checked" style="float:left;" name="HasContent">
 						<select name="content" id="selContent">
+							<option selected="selected" type="static" value="">Static Url</option>
 							{% for cont in  contents %}
 							<option value="{{cont.key}}">{{cont.Title}}</option>
 							{% endfor %}
@@ -62,7 +118,9 @@
 				</tr>
 				<tr>
 					<td>Url Name:</td>
-					<td><input type="text" name="addressName" id="addressName"></input></td>
+					<td>
+					<input type="text" style="display:none;" id="addressNameHidden"></input>
+					<input type="text" name="addressName" id="addressName"></input></td>
 				</tr>
 				<tr>
 					<td>Name</td>
@@ -75,11 +133,10 @@
 			</table>
 		</div>
 		<div id="divTree" style="float: left">
-	    	{%include LinksTree %}
+	    	{%autoescape off%}
+        	{{menu.to_list}}
+        	{%endautoescape%}
 		</div>
-        <div id="divMenus">
-            {%comment%}include MenuTree{%endcomment%}
-        </div>
         <div style="clear: both;"></div>
 		</div>
     	<input type="submit" value="Save"></input>

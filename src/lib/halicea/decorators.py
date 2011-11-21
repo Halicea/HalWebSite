@@ -8,6 +8,7 @@ from conf.settings import DEBUG
 from lib import messages
 from lib.halicea import ContentTypes as ct
 import traceback,logging
+from lib.halicea import cache
 #from Controllers.MyRequestHandler import MyRequestHandler as mrh
 import warnings
 def property(function):
@@ -27,7 +28,6 @@ def CopyDecoratorProperties(func, new_func):
     new_func.__name__ = func.__name__
     new_func.__doc__ = func.__doc__
     new_func.__dict__.update(func.__dict__)
-
 
 def deprecated(func):
     """This is a decorator which can be used to mark functions
@@ -50,6 +50,7 @@ class ClearDefaults(object):
             return f(request, *args, **kwargs)
         CopyDecoratorProperties(f, new_f)
         return new_f
+
 class Post(object):
     def __init__(self):
         pass
@@ -236,3 +237,27 @@ class ExtraContext(object):
         CopyDecoratorProperties(f, new_f)
         return new_f
 # End Decorators for handler Methods
+
+#Cache Decorators
+
+#TODO: Make it as a class and change the name of the returning funciton. 
+#also add it into the decorators module
+class CachedResource(object):
+    @staticmethod
+    def resName(res , request, *args, **kwargs):
+        return '__RESOURCE__'+request.__class__.__name__+'-'+res.__name__+'-'+str(args)+'-'+str(kwargs)
+    def __init__(self, time=0, namespace=None):
+        self.namespace=namespace
+        self.time=time
+    def __call__(self, f):
+        def new_f(request, *args, **kwargs):
+            resName = CachedResource.resName(f, request,*args, **kwargs)
+            res = cache.get(resName)
+            if not res:
+                res = f(request, *args, **kwargs)
+                cache.set(resName, res, self.time, namespace=self.namespace)
+                return res
+        CopyDecoratorProperties(f, new_f)
+        return new_f
+
+    
