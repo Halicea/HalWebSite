@@ -35,6 +35,7 @@ webapphandlers = [
 ('/cms/tag/(.*)', cmsControllers.CMSPageController.new_factory(op='index')),
 ('/', cmsControllers.CMSPageController.new_factory(op='index')),
 ('/menu/(.*)', cmsControllers.MenuController),
+('/menus', cmsControllers.MenuController.new_factory(op='index')),
 
 #{%endblock%}
 

@@ -47,6 +47,9 @@
 				//$('#divTree').fadeOut();
 			}
 		});
+		$('#menuList').change(function(){
+			getTree();
+		})
 	});
 	function getTree(menu){
 		$.post('/menu/'+activeMenu,
@@ -70,7 +73,6 @@
 			function(data){
 				$('divStatus').html(data);
 				getTree();
-				setTree();
 			});
 		});
 		$("#menu_"+activeMenu).treeview({
@@ -132,10 +134,18 @@
 				</tr>
 			</table>
 		</div>
-		<div id="divTree" style="float: left">
+		<div style="float:left";width:100%;">
+		<select id="menuList" style="width:100%;">
+			{%for m in menus%}
+				<option value="{{m.Name}}">{{m.Name}}</option>
+			{%endfor%}
+		</select>
+		<div id="divTree" style="float:left;">
 	    	{%autoescape off%}
         	{{menu.to_list}}
         	{%endautoescape%}
+		</div>
+		<div style="clear: both;"></div>
 		</div>
         <div style="clear: both;"></div>
 		</div>

@@ -35,8 +35,9 @@ class CMSLinksController(CMSBaseController):
                          AddressName=menu, Name=menu, 
                          Creator=self.User, ContentTypeNumber=2)
             resultMenu = cms.Menu.CreateFromLinkRoot(menu, 'None', None, root, True) 
+        
         contents = cms.CMSContent.all().order('-DateCreated').fetch(limit=limit, offset=offset)
-        return {'menu':resultMenu, 'contents':contents}
+        return {'menu':resultMenu, 'contents':contents, 'menus':cms.Menu.all()}
     @AdminOnly()
     def save(self, *args):
         addressName = self.params.addressName
@@ -82,6 +83,7 @@ class MenuController(CMSBaseController):
         super(MenuController, self).__init__(*args, **kwargs)
     @ClearDefaults()
     @Default('view')
+    @Handler('index')
     def SetOperations(self):pass
     
     @CachedResource()
