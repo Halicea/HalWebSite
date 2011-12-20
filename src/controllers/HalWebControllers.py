@@ -6,7 +6,10 @@ from lib.halicea.decorators import *
 
 class WelcomeController(hrh):
     @ClearDefaults()
-    @Default('welcome')
+    @Default('UnderConstruction')
     def SetOperations(self): pass
     def welcome(self):
-        return {}    
+        return {}
+    
+    def UnderConstruction(self, *args):
+        return {}

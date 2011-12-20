@@ -6,8 +6,8 @@ from lib.halicea import ContentTypes as ct
 #{%block imports%}
 from lib.halicea.HalRequestHandler import HalRequestHandler as hrh
 from lib.halicea.decorators import *
-from models.BaseModels import RoleAssociation, RoleAssociationForm 
-from models.BaseModels import Role, RoleForm 
+from models.BaseModels import RoleAssociation, RoleAssociationForm
+from models.BaseModels import Role, RoleForm
 from models.BaseModels import Person
 from models.BaseModels import Invitation
 from models.BaseModels import WishList, WishListForm
@@ -39,9 +39,9 @@ class LoginController( hrh ):
                            method=urlfetch.POST,
                            headers={'Content-Type':'application/x-www-form-urlencoded'}
                            )
-    
+
         json = simplejson.loads(r.content)
-    
+
         if json['stat'] == 'ok':
             person = Person.gql("WHERE UserName= :u AND AuthenticationType= :auth", u=json['profile']['preferredUsername'], auth=json['profile']['providerName']).get()
             if not person:
@@ -52,7 +52,7 @@ class LoginController( hrh ):
                 photo = json['profile'].has_key('photo') and json['profile']['photo'] or None
                 if not name and not surname and display:
                     arr = display.split(' ')
-                    name = arr[0]; 
+                    name = arr[0];
                     surname = len(arr)>1 and arr[1] or ''
                 if len(args)==1:
                     person = Person.get(args[0])
@@ -77,7 +77,7 @@ class LoginController( hrh ):
                                               authType=json['profile']['providerName'],
                                               photoUrl=photo,
                                               _autoSave=True)
-                    
+
             self.login_user2(person)
             self.status = 'Welcome '+person.UserName
             if self.params.redirect_url:
@@ -118,11 +118,11 @@ class LogoutController( hrh ):
 class AddUserController( hrh ):
     def get( self ):
         self.respond()
-        
+
     def post( self ):
         self.SetTemplate(templateName='Thanks.html')
         try:
-            user = Person( 
+            user = Person(
                            UserName = self.g('UserName'),
                            Email=self.g( 'Email' ),
                            Name=self.g( 'Name' ),
@@ -201,7 +201,7 @@ class RoleController(hrh):
             self.respond(result)
 
 class RoleAssociationController(hrh):
-    def edit(self, *args):   
+    def edit(self, *args):
         self.SetTemplate(templateName='RoleAssociation_shw.html')
         if self.params.key:
             item = RoleAssociation.get(self.params.key)
@@ -284,7 +284,7 @@ class WishListController(hrh):
         form = None
         if self.params.key:
             instance = WishList.get(self.params.key)
-            form = WishListForm(instance=instance) 
+            form = WishListForm(instance=instance)
         else:
             form = WishListForm(data=self.request.POST)
         if form.is_valid():
@@ -333,11 +333,11 @@ class InvitationController(hrh):
             inv =Invitation.CreateNew2(invitefrom=self.User, personbinding=p, _isAutoInsert=True)
             mail.send_mail(sender='admin@halicea.com',to=p.Email,subject='Invitation for Bordj',
                            body="""Dear Mr/Ms,<br/>
-    You have been invited to register on Bordj app from {%s}.<br/>
+    You have been invited to register on Halicea web site app from {%s}.<br/>
     Please go to this <a href="%s">link</a> in order to finish the registration.<br/>
     <b>Note:</b>Registration info will expire in 7 days.<br/>
     Regards,
-       Bordj Admin"""%(self.User, LoginController.get_url(inv.key().__str__())))
+       Halicea Web Admin"""%(self.User, LoginController.get_url(inv.key().__str__())))
             return """{result:True, message:"Invitation is sent to the user"}"""
 
     def index(self, accepted=False, *args):
@@ -349,7 +349,7 @@ class InvitationController(hrh):
         except:
             pass
         nextIndex = index+count;
-        previousIndex = index<=0 and -1 or (index-count>0 and 0 or index-count) 
+        previousIndex = index<=0 and -1 or (index-count>0 and 0 or index-count)
         result = {'InvitationList': Invitation.all().filter('Accepted = ', accepted).fetch(limit=count, offset=index)}
         result.update(locals())
         return result
@@ -359,6 +359,5 @@ class InvitationController(hrh):
             self.response.headers["Content-Type"]=ct.JSON
             return """{message:"Item is deleted"}"""
         else:
-            from BordjControllers import DolgController
-            self.redirect(DolgController.get_url())
+            self.redirect('/')
 

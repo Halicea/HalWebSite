@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import os
 from os.path import join
 #from lib.halicea import deCMSPageControllerfaultControllerMethods as dcm
@@ -10,6 +9,7 @@ DEFAULT_CHARSET ='UTF-8'
 
 from lib.halicea import dummyControllerMethods as dcm
 APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
+
 if os.name == 'nt':
     APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
     #APPENGINE_PATH = 'C:\\devApps\\google_appengine'

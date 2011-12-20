@@ -50,11 +50,11 @@ $(function(){
 </script>
 {%endblock%}
 {% block top_menu %}
-	{% include mnTopMenu %}
+	{%comment%} include mnTopMenu {%endcomment%}
 {% endblock %}
 
 {% block login_menu %}
-	{% include blLogin %}
+	{%comment%} include blLogin {%endcomment%}
 {% endblock %}
 {% block status %}
 	{% if status %}

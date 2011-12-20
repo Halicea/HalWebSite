@@ -1,10 +1,13 @@
-application: halwebsite
-version: 1
+application: halicea-cms
+version: 2
 runtime: python
 api_version: 1
 
 builtins:
 - datastore_admin: on
+
+inbound_services:
+- warmup
 
 handlers:
 - url: /styles

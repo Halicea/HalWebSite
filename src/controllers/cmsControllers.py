@@ -32,9 +32,9 @@ class CMSLinksController(CMSBaseController):
         if not resultMenu:
             root = cms.CMSLink.get_or_insert(
                          key_name = menu, 
-                         AddressName=menu, Name=menu, 
+                         AddressName=menu, Name=menu,
                          Creator=self.User, ContentTypeNumber=2)
-            resultMenu = cms.Menu.CreateFromLinkRoot(menu, 'None', None, root, True) 
+            resultMenu = cms.Menu.CreateFromLinkRoot(menu, 'None', None, root, True)
         
         contents = cms.CMSContent.all().order('-DateCreated').fetch(limit=limit, offset=offset)
         return {'menu':resultMenu, 'contents':contents, 'menus':cms.Menu.all()}
