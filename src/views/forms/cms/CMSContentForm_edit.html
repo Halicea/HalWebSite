@@ -1,0 +1,33 @@
+<link href="/jscripts/cleditor/jquery.cleditor.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/jscripts/cleditor/jquery.cleditor.min.js"></script>
+
+<div class="post">
+    <div class="postHeader">
+        <h1>Add New:</h1>
+    </div>
+    <div class="postContent">
+        <form action="/cms/contents" method="post">
+            <input type="hidden" name="op" value="insert">
+            <input type="hidden" name="key" value="{{content.key}}">
+            {{CMSContentForm.Title.label}}:{{CMSContentForm.Title.errors}}<br/> 
+            {{CMSContentForm.Title}}<br/>
+            {{CMSContentForm.Content.label}}:<label style="color: red">{{CMSContentForm.Content.errors}}</label> <br/>
+            <textarea id="id_Content" name="Content">{%if content%}{{content.HTMLContent}}{%endif%}</textarea><br/>
+            {{CMSContentForm.Tags.label}}:{{CMSContentForm.Tags}}
+            <input type="submit" value="Save"></input>
+            {%if content.key%}
+            <input type="button" class="deleteContent" key="{{content.key}}" value="Delete"></input>
+            {%endif%}
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+$('.delete_content').click(function(){
+    var key = $(this).attr('key');
+    window.location = '/cms/contents?op=delete&key='+key;
+    return false;
+});
+$('#id_Content').cleditor({width:500, height:100})[0].focus();
+});
+</script>

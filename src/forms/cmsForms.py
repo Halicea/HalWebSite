@@ -13,3 +13,10 @@ class CMSContentForm(Form):
     Content = fields.CharField(widget=widgets.Textarea(), required=True)
     Tags = fields.CharField(required=False)
 ##End Comment
+
+class CMSMenuForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(CMSMenuForm, self).__init__(*args, **kwargs)
+    key = fields.Field(widget=widgets.HiddenInput, required=False)
+    Name = fields.CharField(required=True, min_length=3)
+    

@@ -13,6 +13,7 @@ from models.BaseModels import Invitation
 from models.BaseModels import WishList, WishListForm
 from forms.BaseForms import LoginForm
 #{%endblock%}
+
 class LoginController( hrh ):
     @Default('login')
     @Handler('JanrainAuth','JanrainAuth')

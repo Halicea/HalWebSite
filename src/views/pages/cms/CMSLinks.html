@@ -9,9 +9,27 @@
 <script src="/jscripts/jquery.cookie.js" type="text/javascript"></script>
 <script src="/jscripts/jquery.treeview/jquery.treeview.js" type="text/javascript"></script>
 <script src="/jscripts/jquery.synctranslit.min.js" type="text/javascript"></script>
+
 <script type="text/javascript">
 	var activeMenu = '{{menu.Name}}'; 
-	$(function() {		
+	var dialog = null;
+	var contentTypes = new Object;
+	//Content Types
+	contentTypes.CMSPage = 0
+	contentTypes.StaticPage = 1
+	contentTypes.NoContent = 2
+	//contentType.Post = 3
+	
+	$(function() {
+		newMenuDialog = $('#newMenu').dialog({autoOpen: false,
+            modal: true,
+            height: 180,
+            width: 230});
+		newContentDialog = $('#newContent').dialog({autoOpen: false,
+            modal: true,
+            height: 600,
+            width: 600});
+		
 		setTree();
 		$('#frmNewLink').ajaxForm(function(data){
 			$('#divTree').html(data);
@@ -34,20 +52,38 @@
 				});
 				$("#linkName").val(name);
 			}
+			setContentType();
 		});
 		$('#selContent').trigger('change');
+		
 		$('#isContent').change(function(){
 			if($("#isContent").is(':checked')){
 				$('#selContent').attr("disabled",false);
 				$('#selContent').show();
-				//$('#divTree').fadeIn();
 			}else{
 				$('#selContent').attr("disabled",true);
 				$('#selContent').hide();
-				//$('#divTree').fadeOut();
 			}
+			setContentType();
+		});
+		$('#selMenu').change(function(){
+			activeMenu = $(this).val();
+			getTree(activeMenu);
 		});
 	});
+	function setContentType(){
+		var value;
+		if($("#isContent").is(':checked')){
+			if($('#selContent').val()==""||$('#selContent').val()==null){
+				value = contentTypes["StaticPage"];
+			}else{
+				value= contentTypes["CMSPage"];
+			}
+		}else{
+			value = contentTypes["NoContent"];
+		}
+		$('#hdnContentType').val(value.toString());
+	}
 	function getTree(menu){
 		$.post('/menu/'+activeMenu,
 		function(data){
@@ -57,7 +93,7 @@
 	}
 	function setTree(){
 		var templ = "<input type='radio' name='parentLink' value='${key}'>"
-		var delTempl = "<a href='#' class='delNode'>delete</a>"
+		var delTempl = "<a href='#' class='delNode'><img src='/images/trash.png' style='width:18px;' alt='delete'></a>"
 		$("#menu_"+activeMenu+" li").each(function(){
 			var id = $(this).find("a").attr("id");
 			var t = templ.replace("${key}", id)
@@ -66,12 +102,20 @@
 		});
 		$('.delNode').click(function(){
 			key = $(this).next().next().attr('id');
-			$.post('/cms/links?op=delete&key='+key,
-			function(data){
-				$('divStatus').html(data);
-				getTree();
-				setTree();
-			});
+			//#delete the entire menu if root link is selected
+			if(key==null || key==''){
+				$.post('/menu/'+$('#selMenu').val(),'op=delete').success(function(data){
+					alert('menu is deleted');
+					
+				});
+			}else{
+				$.post('/cms/links?op=delete&key='+key,
+				function(data){
+					$('divStatus').html(data);
+					getTree();
+					setTree();
+				});
+			}
 		});
 		$("#menu_"+activeMenu).treeview({
 			collapsed: false,
@@ -80,28 +124,27 @@
 			persist: "location"
 		});
 	}
-	function showMenu(){
-		
-	}
-	function showContentDialog(){
-		
-	}
-	function newMenuDialog(){
-		
-	}
+	
 </script>
 
 {%endblock%}
 {% block content %}
 <div class="post">
     <h2>New Link:
-    <input type="BUTTON" class="btnSmall" value="Add New Content" onclick="newContentDialog(); return false;"/>
-    <input type="BUTTON" class="bntSmall"  value="Show Menu" onclick="showMenu(); return false;"/>
+    <input type="BUTTON" class="btn" value="Add New Content" onclick="newContentDialog(); return false;"/>
+    <input type="BUTTON" class="bntSmall"  value="New Menu" onclick="newMenuDialog(); return false;"/>
    </h2> 
+   <div id="newContent" title="New Content">
+      {%include CMSContentForm_edit%}    
+   </div>
+   <div id="newMenu" title="New Menu">
+      {%include Menu_edit%}    
+   </div>
     <form action="" method="post" id="frmNewLink">
 		<input type="hidden" name="op" value="save"></input>
-		<input type="hidden" name="menu" value="{{menu.Name}}"></input>
+		<input type="hidden" id ="hdnContentType" name="ContentType"/>
 		<div style="width:100%;min-height:150px; display: block;">
+		<!-- Content Selection -->
 		<div style="float:left; text-align: right;">
 			<table>
 				<tr>
@@ -132,11 +175,24 @@
 				</tr>
 			</table>
 		</div>
+		<!-- Menu Selection -->
+		Menu:<select name="menu" id="selMenu">
+		   <option value="no_menu">--Select Menu--</option>
+		  {%for m in menus%}
+		  <option value="{{m.Name}}"
+		  {%ifequal menu.Name m.Name%}selected="selected"{%endifequal%}>
+		  {{m.Name}}
+		  </option>
+		  {%endfor%}
+		</select>
+		<hr/>
+		<!-- Link Selection -->
 		<div id="divTree" style="float: left">
 	    	{%autoescape off%}
         	{{menu.to_list}}
         	{%endautoescape%}
 		</div>
+       
         <div style="clear: both;"></div>
 		</div>
     	<input type="submit" value="Save"></input>

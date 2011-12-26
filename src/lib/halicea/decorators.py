@@ -9,7 +9,6 @@ from lib import messages
 from lib.halicea import ContentTypes as ct
 import traceback,logging
 from lib.halicea import cache
-#from Controllers.MyRequestHandler import MyRequestHandler as mrh
 import warnings
 def property(function):
     keys = 'fget', 'fset', 'fdel'

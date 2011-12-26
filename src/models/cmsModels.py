@@ -3,7 +3,6 @@ from BaseModels import Person
 import datetime as dt
 from lib.halicea.decorators import property
 
-
 class CMSContent(db.Model):
     Title = db.StringProperty(required=True)
     HTMLContent = db.TextProperty(required=True)
@@ -36,11 +35,24 @@ class CMSContent(db.Model):
         if self.Links:
             return db.get(self.Links)
         return None
+
 class ContentType:
+    """
+        CMSPage , part of the cms system, it usualy should be a part of some menu structure.
+        External Page, can't have any children
+        Static page is a regular page inside of the application
+    """
     CMSPage = 0
     StaticPage = 1
-    NoContent = 2 
+    NoContent = 2
+    Post = 3
+
 class CMSLink(db.Model):
+    """Link have parent link, have contant and come with several variations depending on the content type:
+        1. CMSPage
+        2. Static Page
+        3. No Content (usualy just a parent link to some other links with content, sittuable for creating menus)
+    """
     AddressName = db.StringProperty(required=True)
     AdditionalUrl = db.StringProperty()
     Name = db.StringProperty(required=True)
@@ -52,6 +64,9 @@ class CMSLink(db.Model):
     ContentTypeNumber = db.IntegerProperty(default = 0)
     DateCreated =db.DateTimeProperty(auto_now_add=True)
     LastDateModified =db.DateTimeProperty(auto_now=True)
+    
+    def __str__(self):
+        return self.ParentLink or "None"+"/"+self.AddressName
     
     def GetChildren(self):
         return CMSLink.gql("WHERE Depth =:depth AND ParentLink =:pl", depth=self.Depth+1, pl=self).fetch(limit=1000)
@@ -68,11 +83,14 @@ class CMSLink(db.Model):
             return result
         else:
             return self.AdditionalUrl
-    def GetTreeBelow(self):
+        
+    def GetTreeBelow(self, ignoreAddresses=[]):
         children = self.GetChildren()
         result = {}
-        for child in children:
-            result[child] = child.GetTreeBelow()
+        for child in children :
+            if not (child.AddressName in ignoreAddresses):
+                ignoreAddresses.append(child.AddressName)
+                result[child] = child.GetTreeBelow(ignoreAddresses)
         return result
     def delete(self):
         if self.Content:
@@ -91,29 +109,32 @@ class CMSLink(db.Model):
             self.Content.Links.append(self.key())
             self.Content.HasLinks=True
             self.Content.put()
+
+    ###############################
+    ## Static Methods 
     @classmethod
     def GetLinkByPath(cls, path):
         items = [p for p in path.split('/') if p]
         curPar=None
-        i=0
-        for lnkStr in items:
-            new_item = CMSLink.gql("WHERE Depth =:depth AND ParentLink =:pl AND AddressName =:address",depth=i, pl=curPar, address=lnkStr).get()
-            if new_item: 
-                curPar = new_item
-            else:
-                curPar = None
-                break;
-            i+=1;
+        if items:
+            curPar = CMSLink.get_by_key_name(items[0])
+        if len(items)>1:
+            i=1
+            for lnkStr in items:
+                new_item = CMSLink.gql("WHERE Depth =:depth AND ParentLink =:pl AND AddressName =:address",depth=i, pl=curPar, address=lnkStr).get()
+                if new_item: 
+                    curPar = new_item
+                else:
+                    curPar = None
+                    break;
+                i+=1;
         return curPar
-
-    ###############################
-    ## Static Methods 
-  
     @staticmethod
     def GetLinksByDate(dateFrom, dateTo):
         return CMSLink.gql("WHERE LastDateModified > :ldf AND LastDateModified < :ldt ORDER BY LastDateModified ASC", ldf=dateFrom, ldt=dateTo).fetch(1000)
+    
     @classmethod
-    def CreateNew2(cls, addressName, name, parentLink, order, content, contentType, creator, _isAutoInsert=False):
+    def CreateNew(cls, addressName, name, parentLink, order, content, contentType, creator, _isAutoInsert=False):
         if not parentLink:
             depth = -1
         else:
@@ -124,18 +145,19 @@ class CMSLink(db.Model):
             addressName = name
         if contentType==ContentType.NoContent:
             additionalUrl = ""
-        result = cls(key_name=addressName, AddressName=addressName, 
+        result = cls(parent=parentLink, key_name=addressName, AddressName=addressName, 
                      AdditionalUrl=additionalUrl, Name=name, ContentTypeNumber=contentType, 
                      ParentLink=parentLink, Depth=depth, Order=order, 
                      Content=content, Creator=creator)
         if _isAutoInsert: result.put()
         return result
+    
     @classmethod
     def GetLinkTree(cls, menu='cms'):
         root = CMSLink.get_by_key_name(menu)
         if not root:
             root = CMSLink.CreateNew2('/cms', 'Root', None, -1, None, None, _isAutoInsert=False)
-        return root.GetTreeBelow()
+        return root.GetTreeBelow({})
 #        tree = cls.gql('WHERE Depth =:d', d=-1).fetch(limit=1000, offset=0)
 #        result = {} 
 #        # get the root nodes
@@ -143,15 +165,17 @@ class CMSLink(db.Model):
 #            result[t] = t.GetTreeBelow()
 #        return result
     ## End Static Methods
+    
 class Menu(db.Model):
+    """Three of CMS Links"""
     Name = db.StringProperty(required = True)
     LocationId = db.TextProperty(required = True)
     CssClass = db.StringProperty()
     LinkRoot = db.ReferenceProperty(CMSLink, collection_name='linkroot_menus')
     @classmethod
     def CreateNew(cls, name, locationId, cssClass, creator, _isAutoInsert=False):
-        root = CMSLink.CreateNew2(name, name, None, -1, None, creator, _isAutoInsert=_isAutoInsert)
-        res = cls(Name=name, LocationId=locationId, CssClass = cssClass, LinkRoot=root)
+        root = CMSLink.CreateNew(name, name,  None, -1, None, ContentType.NoContent, creator, _isAutoInsert=_isAutoInsert)
+        res = cls(key_name=name, Name=name, LocationId=locationId, CssClass = cssClass, LinkRoot=root)
         if _isAutoInsert: res.put()
         return res
     @classmethod
@@ -180,12 +204,17 @@ class Menu(db.Model):
         else:
             return template%{'id':id, 'name':name, 'style':style, 'class':cl,'key':str(self.LinkRoot.key()),'rest':result}
     
-    def __renderNode__(self, node, spacer):
+    def __renderNode__(self, node, spacer, circ_ref_stop=[]):
         link = '\n'+('\t'*spacer)+"<li><a href='%(url)s' id='%(key)s'>%(name)s</a><ul>%(rest)s</ul></li>"
-        return link%{'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':'\n'.join([self.__renderNode__(x, spacer+1) for x in node.parent_link_cms_links])}
-
-
+        nodes_to_continue = [x for x in node.parent_link_cms_links if x.key().__str__() not in circ_ref_stop]
+        circ_ref_stop.extend([x.key().__str__() for x in nodes_to_continue])
+        return link%{'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':'\n'.join([self.__renderNode__(x, spacer+1, circ_ref_stop) for x in nodes_to_continue])}
+    
+    def __str__(self):
+        return self.Name
+    
 class ContentTag(db.Model):
+    """Tags for some Content"""
     TagName = db.StringProperty(required=True)
     Count = db.IntegerProperty(default=0)
     @staticmethod

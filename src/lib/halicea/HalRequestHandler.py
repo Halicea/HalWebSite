@@ -52,6 +52,7 @@ class HalRequestHandler( webapp.RequestHandler ):
         self.__templateIsSet__= False
         self.__template__ =""
         self.extra_context ={}
+        self.plugins = []
     # Constructors
     def initialize( self, request, response ):
         """Initializes this request handler with the given Request and Response."""
@@ -62,13 +63,13 @@ class HalRequestHandler( webapp.RequestHandler ):
         if self.request.headers.environ.get('CONTENT_TYPE') == 'application/json':
             data = simplejson.loads(self.request.body)
             #TODO handle the parameters
-            self.params = HalRequestHandler.RequestParameters(request)
+            self.params = HalRequestHandler.DynamicParameters(request)
         elif self.request.headers.environ.get('CONTENT_TYPE') == 'application/xml':
             data = serializers.deserialize('xml', self.request.body)
             #TODO handle the parameters
-            self.params = HalRequestHandler.RequestParameters(request)
+            self.params = HalRequestHandler.DynamicParameters(request)
         else:
-            self.params = HalRequestHandler.RequestParameters(self.request)
+            self.params = HalRequestHandler.DynamicParameters(self.request)
         #self.request = super(MyRequestHandler, self).request
         if not self.isAjax: self.isAjax = self.g('isAjax')=='true'
         # set the status variable
@@ -114,13 +115,14 @@ class HalRequestHandler( webapp.RequestHandler ):
         setattr(new_instance, 'get_url', cls.get_url)
         return new_instance
 
-    class RequestParameters(object):
+    class DynamicParameters(object):
         def __init__(self, request):
             self.request = request
         def __getattr__(self, name):
             return self.request.get(name)
         def get(self, name , default=None):
             return self.request.get(name, default)
+        
     def __get_template(self):
         if not self.__templateIsSet__:
             self.SetTemplate(None, None, None)
@@ -344,11 +346,13 @@ class HalRequestHandler( webapp.RequestHandler ):
             result['current_server']=os.environ['HTTP_HOST']
         if not result.has_key('op'):
             result['op'] = self.op
+        if not result.has_key('request'):
+            result['request']=self
         #update the variables
         result.update(paths.GetBasesDict())
         result.update(paths.GetBlocksDict())
         result.update(paths.GetFormsDict(path.join(settings.FORM_VIEWS_DIR, self.TemplateType))) ##end
-        result.update(paths.getViewsDict(self.TemplateDir,''))
+        result.update(paths.getViewsDict(os.path.pardir(self.Template)))
         if mobile_agents.detect_mobile(self.request): #decide if the request is mobile
             self.mobile = True
             result['mobile']='mobile'
