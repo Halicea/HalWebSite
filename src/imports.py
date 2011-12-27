@@ -13,6 +13,14 @@ from handlerMap import webapphandlers
 from google.appengine.ext.webapp.util import run_wsgi_app
 from lib.gaesessions import SessionMiddleware
 COOKIE_KEY = '''2zÆœ;¾±þ”¡j:ÁõkçŸÐ÷8{»Ën¿A—jÎžQAQqõ"bøó÷*%†™ù¹b¦$vš¡¾4ÇŸ^ñ5¦'''
+
+#register Plugins
+from lib.halicea.plugins import *
+from lib.halicea.HalRequestHandler import HalRequestHandler
+HalRequestHandler.register(
+    Authentication, 
+)
+#end
 def webapp_add_wsgi_middleware(app):
     from google.appengine.ext.appstats import recording
     app = SessionMiddleware(app, cookie_key=COOKIE_KEY)

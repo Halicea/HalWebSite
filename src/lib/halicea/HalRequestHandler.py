@@ -1,26 +1,15 @@
-from google.appengine.ext import webapp
-from google.appengine.ext import db
-from models.BaseModels import Person
-
-#from lib.appengine_utilities import sessions
-from lib.gaesessions import get_current_session
+from os import path
+import os
 import lib.paths as paths
-import logging
 import conf.settings as settings
 from lib.halicea.Magic import MagicSet
 from lib.halicea import  mobile_agents
-from os import path
-import os
+from lib.halicea.helpers import DynamicParameters
+from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from django.utils import simplejson
-from django.core import serializers
+from google.appengine.ext import db
 
-import warnings
-#from lib.webapp2 import template
-#from lib.halicea import template
-#from jinja2 import FileSystemLoader, Environment, TemplateNotFound
-#from lib.halicea.jinjaCustomTags import UrlExtension
-#env = Environment(loader = FileSystemLoader([settings.VIEWS_DIR,]), extensions=[UrlExtension])
+
 from lib.NewsFeed import NewsFeed
 templateGroups = {'form':settings.FORM_VIEWS_DIR,
                   'page':settings.PAGE_VIEWS_DIR,
@@ -54,22 +43,23 @@ class HalRequestHandler( webapp.RequestHandler ):
         self.extra_context ={}
         self.plugins = []
     # Constructors
-    def initialize( self, request, response ):
+    def initialize( self, request, response):
         """Initializes this request handler with the given Request and Response."""
         self.isAjax = ((request.headers.environ.get('HTTP_X_REQUESTED_WITH')=='XMLHttpRequest') or (request.headers.get('X-Requested-With')=='XMLHttpRequest'))
 #        logging.debug("Content Type is %s", str(request.headers.get('Content-Type')))
         self.request = request
         self.response = response
-        if self.request.headers.environ.get('CONTENT_TYPE') == 'application/json':
-            data = simplejson.loads(self.request.body)
-            #TODO handle the parameters
-            self.params = HalRequestHandler.DynamicParameters(request)
-        elif self.request.headers.environ.get('CONTENT_TYPE') == 'application/xml':
-            data = serializers.deserialize('xml', self.request.body)
-            #TODO handle the parameters
-            self.params = HalRequestHandler.DynamicParameters(request)
-        else:
-            self.params = HalRequestHandler.DynamicParameters(self.request)
+#        if self.request.headers.environ.get('CONTENT_TYPE') == 'application/json':
+#            data = simplejson.loads(self.request.body)
+#            #TODO handle the parameters
+#            self.params = DynamicParameters(request)
+#        elif self.request.headers.environ.get('CONTENT_TYPE') == 'application/xml':
+#            data = serializers.deserialize('xml', self.request.body)
+#            #TODO handle the parameters
+#            self.params = DynamicParameters(request)
+#        else:
+        if True:
+            self.params = DynamicParameters(self.request)
         #self.request = super(MyRequestHandler, self).request
         if not self.isAjax: self.isAjax = self.g('isAjax')=='true'
         # set the status variable
@@ -114,14 +104,10 @@ class HalRequestHandler( webapp.RequestHandler ):
         new_instance.__name__ = cls.__name__ #+ 'Factory'
         setattr(new_instance, 'get_url', cls.get_url)
         return new_instance
-
-    class DynamicParameters(object):
-        def __init__(self, request):
-            self.request = request
-        def __getattr__(self, name):
-            return self.request.get(name)
-        def get(self, name , default=None):
-            return self.request.get(name, default)
+    @staticmethod
+    def register(*args):
+        regs = tuple(args)
+        HalRequestHandler.__bases__+=regs
         
     def __get_template(self):
         if not self.__templateIsSet__:
@@ -183,35 +169,8 @@ class HalRequestHandler( webapp.RequestHandler ):
             result = os.path.join(tDir, tType, templateName)
         return result
 
-    def __getSession__(self):
-        return get_current_session()
-    session = property(__getSession__)
-    @classmethod
-    def GetUser(cls):
-        s = get_current_session()
-        if s and s.is_active():
-            return s.get('user', default=None)
-        else:
-            return None
-    @property
-    def User(self):
-        return HalRequestHandler.GetUser()
-    def login_user_local(self, uname, passwd):
-        self.logout_user()
-        user = Person.GetUser(uname, passwd, 'local')
-        if user:
-            self.session['user']= user; return True            
-        else:
-            return False
-    def login_user2(self, user):
-        if user:
-            self.session['user']= user; return True            
-        else:
-            return False
-    def logout_user(self): 
-        if self.session.is_active():
-            self.session.terminate()
-        return True
+
+
     # end Properties
     def SetDefaultOperations(self):
         if hasattr(settings, 'DEFAULT_OPERATIONS'):
@@ -236,6 +195,7 @@ class HalRequestHandler( webapp.RequestHandler ):
 
     # Methods
     def g(self, item):
+        
         return self.request.get(item)
 #   the method by the operation
     def __route__(self, method, *args, **kwargs):
@@ -301,8 +261,10 @@ class HalRequestHandler( webapp.RequestHandler ):
                             {'m':item}, debug=settings.DEBUG))
         else:
             self.__respond(str(item))
+            
     def respond_static(self, text):
         self.__respond(text)
+        
     def redirect( self, uri, postargs={}, permanent=False ):
         innerdict = dict( postargs )
         if innerdict.has_key( 'status' ):
@@ -322,13 +284,16 @@ class HalRequestHandler( webapp.RequestHandler ):
                 return self.__redirect( uri+ '&' + params )
         else:
             return self.__redirect( uri )
+        
     def redirect_login( self ):
         self.redirect( '/Login' )
         
     def __respond(self, text):
         self.response.out.write(text)
+        
     def __redirect(self, uri, *args):
         webapp.RequestHandler.redirect(self, uri, *args)
+        
     def __render_dict( self, basedict ):
         result={}
         result.update(self.extra_context)
@@ -352,7 +317,8 @@ class HalRequestHandler( webapp.RequestHandler ):
         result.update(paths.GetBasesDict())
         result.update(paths.GetBlocksDict())
         result.update(paths.GetFormsDict(path.join(settings.FORM_VIEWS_DIR, self.TemplateType))) ##end
-        result.update(paths.getViewsDict(os.path.pardir(self.Template)))
+        result.update(paths.getViewsDict(os.path.dirname(self.Template)))
+        
         if mobile_agents.detect_mobile(self.request): #decide if the request is mobile
             self.mobile = True
             result['mobile']='mobile'

@@ -33,7 +33,7 @@ class CMSLinksController(CMSBaseController):
             pass
         menus = cms.Menu.all().fetch(10);
         contents = cms.CMSContent.all().order('-DateCreated').fetch(limit=limit, offset=offset)
-        return {'contents':contents, 'menus':menus}
+        return {'contents':contents, 'menus':menus, 'CMSContentForm': CMSContentForm(), 'MenuForm':CMSMenuForm()}
     
     @AdminOnly()
     def save(self, *args):
@@ -74,6 +74,7 @@ class CMSLinksController(CMSBaseController):
     def LinksTree(self, menu):
         return cms.Menu.get_by_key_name(menu).to_list()
     
+    
 class MenuController(CMSBaseController):
     def __init__(self, *args, **kwargs):
         super(MenuController, self).__init__(*args, **kwargs)
@@ -82,6 +83,7 @@ class MenuController(CMSBaseController):
     @Handler('edit')
     @Handler(operation='new', method='edit')
     @Handler('save')
+    @Handler('index')
     def SetOperations(self):pass
     
     @CachedResource()
@@ -94,7 +96,9 @@ class MenuController(CMSBaseController):
     
     @CachedResource()
     def index(self,*args):
-        return {'menus':cms.Menu.all()}
+        combo_template ="<option value='{0}'>{0}</option>"
+        li_tempalte = "<li></li>"
+        return "<option value='no_menu'>--Select Item--</option>"+'\r\n'.join([combo_template.replace("{0}",(x.Name)) for x in cms.Menu.all()])
     
     def delete(self, key):
         menu = cms.Menu.get(key)

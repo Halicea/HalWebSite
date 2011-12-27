@@ -23,11 +23,11 @@
 </div>
 <script type="text/javascript">
 $(function(){
-$('.delete_content').click(function(){
-    var key = $(this).attr('key');
-    window.location = '/cms/contents?op=delete&key='+key;
-    return false;
-});
-$('#id_Content').cleditor({width:500, height:100})[0].focus();
+	$('.delete_content').click(function(){
+	    var key = $(this).attr('key');
+	    window.location = '/cms/contents?op=delete&key='+key;
+	    return false;
+	});
+	$('#id_Content').cleditor({width:500, height:100})[0].focus();
 });
 </script>

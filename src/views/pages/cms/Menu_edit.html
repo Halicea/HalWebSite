@@ -2,30 +2,5 @@
 <input type="hidden" name="op" value="save"/>
 Menu Name:
 <p>{{MenuForm.Name}}</p>
-<input type="submit" value="Save" onclick="saveMenu(); return false;"/>
+<input type="submit" value="Save" return false;"/>
 </form>
-<script type="text/javascript">
-$(function(){
-	$('#saveMenu').ajaxForm({
-		success:function(data){
-			alert(data);
-		},
-	    error:function(data){
-	    	alert("error"+data)
-	    }
-	});
-});
-/*
-function saveMenu(){
-    var query = $('#myFormId').formSerialize();
-    var action = $('#myFormId').attr("action")
-	$.post(action, query).success(function(data){
-		alert(data);
-		$('#myFormId').resetForm();
-	})
-	.error(function() { alert("error"); })
-    .complete(function() { alert("complete"); });
-    return false;
-}
-*/
-</script>

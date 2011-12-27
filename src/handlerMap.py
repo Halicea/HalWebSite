@@ -6,8 +6,6 @@ from controllers import cmsControllers
 #{%endblock%}
 webapphandlers = [
 #{%block ApplicationControllers %}
-
-
 #{%block BaseControllers %}
 ('/Login', BaseControllers.LoginController),
 ('/Login/(.*)', BaseControllers.LoginController),
