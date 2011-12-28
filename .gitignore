@@ -4,7 +4,7 @@ docs
 db.rdbms
 *.log
 *.htmldict
-#.project
-#.pydevproject
+.project
+.pydevproject
 .settings
 *.pyc
