@@ -37,16 +37,16 @@ class Authentication(object):
 
 class AjaxForm(object):
     __isAjax = False
-    def initialize(request, response):
+    def initialize(self, request, response):
         pass
         
     def beginForm(self, action,name, method, successCallback="", failCallback=""):
         result = """
         <form id='%(name)s' action='%(action)s' method='%(method)s'>
         return result%"""
-        
-    def endForm(self, 'name'):
-        </form>
+        pass
+    def endForm(self, name):
+        result="""</form>
         <script type='text/javascript'>
             %(jqstart)s
                 $('#%(name)s').ajaxForm({

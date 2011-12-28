@@ -9,9 +9,9 @@ from models.cmsModels import *
 class CMSContentForm(Form):
     def __init__(self, *args, **kwargs):
         super(CMSContentForm, self).__init__(*args, **kwargs)
-    Title = fields.CharField(required=True)
+    Title = fields.CharField(required=True, widget=widgets.TextInput(attrs={'style':'width:500px;'}))
     Content = fields.CharField(widget=widgets.Textarea(), required=True)
-    Tags = fields.CharField(required=False)
+    Tags = fields.CharField(required=False, widget=widgets.TextInput(attrs={'style':'width:500px;'}))
 ##End Comment
 
 class CMSMenuForm(Form):
