@@ -9,6 +9,29 @@ TEMPLATE_DEBUG = True
 DEFAULT_CHARSET ='UTF-8'
 
 from lib.halicea import dummyControllerMethods as dcm
+DEFAULT_OPERATIONS =\
+    {
+        'default':{'method':dcm.index, 'view':False},
+        'index':{'method':dcm.index, 'view':True}, 
+        'details':{'method':dcm.details, 'view':True},
+        'edit':{'method':dcm.edit, 'view':True},
+        'create':{'method':dcm.edit, 'view':False},
+        'insert':{'method':dcm.save, 'view':False},
+        'update':{'method':dcm.save, 'view':False},
+        'delete':{'method':dcm.delete, 'view':False},
+     }
+
+PLUGINS =\
+    [
+       ("Links", 'controllers.cmsControllers.CMSLinksController'),
+       ("Contents", 'controllers.cmsControllers.CMSContentController'),
+       ("Menus", 'controllers.cmsControllers.MenuController'),
+       ("AjaxForm", 'lib.halicea.plugins.AjaxForm'), 
+       ("Authentication", 'lib.halicea.plugins.Authentication'),
+    ]
+
+
+
 APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
 if os.name == 'nt':
     APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
@@ -57,16 +80,6 @@ template_debug=True
 show_errors = True
 MagicLevel = 3
 
-DEFAULT_OPERATIONS = {
-                      'default':{'method':dcm.index, 'view':False},
-                      'index':{'method':dcm.index, 'view':True}, 
-                      'details':{'method':dcm.details, 'view':True},
-                      'edit':{'method':dcm.edit, 'view':True},
-                      'create':{'method':dcm.edit, 'view':False},
-                      'insert':{'method':dcm.save, 'view':False},
-                      'update':{'method':dcm.save, 'view':False},
-                      'delete':{'method':dcm.delete, 'view':False},
-                     }
 
 #DJANGO APP SETTINGS SECTION
 TEMPLATE_DIRS = (VIEWS_DIR,)

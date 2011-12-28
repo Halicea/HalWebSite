@@ -4,12 +4,10 @@ import lib.paths as paths
 import conf.settings as settings
 from lib.halicea.Magic import MagicSet
 from lib.halicea import  mobile_agents
-from lib.halicea.helpers import DynamicParameters
+from lib.halicea.helpers import DynamicParameters, RequestDictMixin, LazyDict
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
-
-
 from lib.NewsFeed import NewsFeed
 templateGroups = {'form':settings.FORM_VIEWS_DIR,
                   'page':settings.PAGE_VIEWS_DIR,
@@ -41,34 +39,35 @@ class HalRequestHandler( webapp.RequestHandler ):
         self.__templateIsSet__= False
         self.__template__ =""
         self.extra_context ={}
-        self.plugins = []
     # Constructors
     def initialize( self, request, response):
-        """Initializes this request handler with the given Request and Response."""
-        self.isAjax = ((request.headers.environ.get('HTTP_X_REQUESTED_WITH')=='XMLHttpRequest') or (request.headers.get('X-Requested-With')=='XMLHttpRequest'))
-#        logging.debug("Content Type is %s", str(request.headers.get('Content-Type')))
+        """Initializes this request handler with the given Request and Response.
+           Set the Default Plugins and Handlers
+            and Apply any customizations if defined
+        """
         self.request = request
         self.response = response
+        #TODO: finish this part with the dynamic dict
 #        if self.request.headers.environ.get('CONTENT_TYPE') == 'application/json':
 #            data = simplejson.loads(self.request.body)
 #            #TODO handle the parameters
-#            self.params = DynamicParameters(request)
+#            self.params = DynamicParameters(RequestDictMixin(self.request))
 #        elif self.request.headers.environ.get('CONTENT_TYPE') == 'application/xml':
 #            data = serializers.deserialize('xml', self.request.body)
 #            #TODO handle the parameters
-#            self.params = DynamicParameters(request)
+#            self.params = DynamicParameters(RequestDictMixin(self.request))
 #        else:
-        if True:
-            self.params = DynamicParameters(self.request)
-        #self.request = super(MyRequestHandler, self).request
-        if not self.isAjax: self.isAjax = self.g('isAjax')=='true'
-        # set the status variable
-        if self.session.has_key( 'status' ):
-            self.status = self.session.pop('status')
+        if True: self.params = DynamicParameters(RequestDictMixin(self.request))
+        self.isAjax = ((request.headers.environ.get('HTTP_X_REQUESTED_WITH')=='XMLHttpRequest') or (request.headers.get('X-Requested-With')=='XMLHttpRequest'))
+        if not self.isAjax: self.isAjax = self.params.isAjax=='true'
+        if self.session.has_key( 'status' ): self.status = self.session.pop('status')
+
         #set the default operations
         self.SetDefaultOperations()
-        #make any customisations by overloading this method
         self.SetOperations()
+        self.SetDefaultPlugins()
+        self.SetPlugins()
+        
     @classmethod
     def new_factory(cls, *args, **kwargs):
         """Create new request handler factory.
@@ -84,7 +83,6 @@ class HalRequestHandler( webapp.RequestHandler ):
         
             def __init__(self, transform):
               self.transform = transform
-        
             def post(self):
               response_text = self.transform(
                   self.request.request.body_file.getvalue())
@@ -105,10 +103,9 @@ class HalRequestHandler( webapp.RequestHandler ):
         setattr(new_instance, 'get_url', cls.get_url)
         return new_instance
     @staticmethod
-    def register(*args):
-        regs = tuple(args)
-        HalRequestHandler.__bases__+=regs
-        
+    def extend(*args):
+        HalRequestHandler.__bases__+=tuple(args)
+
     def __get_template(self):
         if not self.__templateIsSet__:
             self.SetTemplate(None, None, None)
@@ -136,6 +133,7 @@ class HalRequestHandler( webapp.RequestHandler ):
             self.__template__ = os.path.join(self.TemplateDir, self.TemplateType, templateName)
             
         self.__templateIsSet__ = True
+
     def GetTemplatePath(self, templateGroup=None, templateType=None, templateName=None):
         tDir = None
         tType =None
@@ -172,6 +170,12 @@ class HalRequestHandler( webapp.RequestHandler ):
 
 
     # end Properties
+    def SetDefaultPlugins(self):
+        if hasattr(settings, 'PLUGINS'):
+            self.plugins = DynamicParameters(LazyDict(settings.PLUGINS, 'initialize', self.request, self.response))
+    def SetPlugins(self):
+        """This method needs to be overwritten in order to customize the plugins in the handler"""
+        pass
     def SetDefaultOperations(self):
         if hasattr(settings, 'DEFAULT_OPERATIONS'):
             if settings.DEFAULT_OPERATIONS:
@@ -192,10 +196,9 @@ class HalRequestHandler( webapp.RequestHandler ):
     def SetOperations(self):
         """This method needs to be overwritten in order to customize the operations in the handler"""
         pass
-
+   
     # Methods
     def g(self, item):
-        
         return self.request.get(item)
 #   the method by the operation
     def __route__(self, method, *args, **kwargs):
