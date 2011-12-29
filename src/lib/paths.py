@@ -7,7 +7,7 @@ import os
 import os.path as p
 from os.path import join as pjoin
 import conf.settings as settings
-from google.appengine.api import memcache
+from lib.halicea import cache
 os.path.sep = '/'
 os.pathsep = '/'
 
@@ -17,15 +17,14 @@ def GetTemplateDir(template_type):
 
 def getViewsDict(directory, base=''):
     result = {}
-    #memcached for better performance
-    memResult = memcache.get('paths_ViewsDict_'+directory)
+    memResult = cache.get('paths_ViewsDict_'+directory)
     if memResult is None:
         if os.path.exists(directory) and os.path.isdir(directory):
             for f in os.listdir(directory):
                 rf = os.path.join(directory, f)
                 if os.path.isfile(rf):
                     result[f[:f.rindex('.')]] = os.path.abspath(rf)#[base and len(base) or 0:]
-        memcache.add(key='paths_ViewsDict', value=result)
+        cache.set(key='paths_ViewsDict', item=result)
         memResult = result
     return memResult
 

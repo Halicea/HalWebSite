@@ -84,6 +84,8 @@ class MenuController(CMSBaseController):
     @Handler(operation='new', method='edit')
     @Handler('save')
     @Handler('index')
+    @Handler('index_combo')
+    @Handler('delete')
     def SetOperations(self):pass
     
     @CachedResource()
@@ -93,9 +95,12 @@ class MenuController(CMSBaseController):
             return result.to_list(self.params)
         else:
             return "No Menu Found"
+        
+    def index(self,*args):
+        return {'menus':cms.Menu.all()}
     
     @CachedResource()
-    def index(self,*args):
+    def index_combo(self,*args):
         combo_template ="<option value='{0}'>{0}</option>"
         li_tempalte = "<li></li>"
         return "<option value='no_menu'>--Select Item--</option>"+'\r\n'.join([combo_template.replace("{0}",(x.Name)) for x in cms.Menu.all()])

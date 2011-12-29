@@ -10,5 +10,5 @@ def save(request, *args, **kwargs):
 def index(request, *args, **kwargs):
     return "I'm in index"
 
-def details(request, *args, **kwargs):
-    return "I'm in details"
+def view(request, *args, **kwargs):
+    return "I'm in index"

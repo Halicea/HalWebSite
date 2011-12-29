@@ -60,7 +60,7 @@ MagicLevel = 3
 DEFAULT_OPERATIONS = {
                       'default':{'method':dcm.index, 'view':False},
                       'index':{'method':dcm.index, 'view':True}, 
-                      'details':{'method':dcm.details, 'view':True},
+                      'view':{'method':dcm.view, 'view':True},
                       'edit':{'method':dcm.edit, 'view':True},
                       'create':{'method':dcm.edit, 'view':False},
                       'insert':{'method':dcm.save, 'view':False},
