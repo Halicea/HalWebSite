@@ -31,10 +31,11 @@ class CMSLinksController(CMSBaseController):
             offset = int(self.params.offset)
         except:
             pass
-        menus = cms.Menu.all().fetch(10);
-        contents = cms.CMSContent.all().order('-DateCreated').fetch(limit=limit, offset=offset)
-        return {'contents':contents, 'menus':menus, 'CMSContentForm': CMSContentForm(), 'MenuForm':CMSMenuForm()}
-    
+        result ={'CMSContentForm': CMSContentForm(), 'MenuForm':CMSMenuForm(), };
+        result.update(self.plugins.Contents.index())
+        result.update({'menu_list':self.plugins.Menus.index()}) 
+        return result
+
     @AdminOnly()
     def save(self, *args):
         addressName = self.params.addressName

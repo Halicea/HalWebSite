@@ -1,10 +1,9 @@
-Docs
-docs
-.idea
-db.rdbms
 *.log
-*.htmldict
-#.project
-#.pydevproject
+.idea
+.project
+.pydevproject
 .settings
 *.pyc
+#database files for appengine
+db.rdbms
+db

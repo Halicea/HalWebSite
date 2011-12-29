@@ -13,7 +13,7 @@ DEFAULT_OPERATIONS =\
     {
         'default':{'method':dcm.index, 'view':False},
         'index':{'method':dcm.index, 'view':True}, 
-        'view':{'method':dcm.view, 'view':True},
+        'details':{'method':dcm.details, 'view':True},
         'edit':{'method':dcm.edit, 'view':True},
         'create':{'method':dcm.edit, 'view':False},
         'insert':{'method':dcm.save, 'view':False},
@@ -80,6 +80,19 @@ template_debug=True
 show_errors = True
 MagicLevel = 3
 
+<<<<<<< HEAD
+DEFAULT_OPERATIONS = {
+                      'default':{'method':dcm.index, 'view':False},
+                      'index':{'method':dcm.index, 'view':True}, 
+                      'view':{'method':dcm.view, 'view':True},
+                      'edit':{'method':dcm.edit, 'view':True},
+                      'create':{'method':dcm.edit, 'view':False},
+                      'insert':{'method':dcm.save, 'view':False},
+                      'update':{'method':dcm.save, 'view':False},
+                      'delete':{'method':dcm.delete, 'view':False},
+                     }
+=======
+>>>>>>> 9f113c3b95eb5ba66b99567e3e4722c2919f5009
 
 #DJANGO APP SETTINGS SECTION
 TEMPLATE_DIRS = (VIEWS_DIR,)

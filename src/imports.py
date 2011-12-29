@@ -9,6 +9,7 @@ use_library('django', '1.2')
 import google.appengine.ext.webapp.template
 from django.conf import settings
 settings._target=None
+
 from handlerMap import webapphandlers
 from google.appengine.ext.webapp.util import run_wsgi_app
 from lib.gaesessions import SessionMiddleware
@@ -17,8 +18,11 @@ COOKIE_KEY = '''2zÆœ;¾±þ”¡j:ÁõkçŸÐ÷8{»Ën¿A—jÎžQAQqõ"bøó�
 #register Plugins
 from lib.halicea.plugins import *
 from lib.halicea.HalRequestHandler import HalRequestHandler
-HalRequestHandler.register(
-    Authentication, 
+
+
+HalRequestHandler.extend(
+    AuthenticationMixin,
+    HtmlHelpersMixin
 )
 #end
 def webapp_add_wsgi_middleware(app):

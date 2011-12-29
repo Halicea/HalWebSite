@@ -1,7 +1,8 @@
 from lib.gaesessions import get_current_session
 from models.BaseModels import Person
+from lib.halicea.helpers import DynamicParameters
 
-class Authentication(object):
+class AuthenticationMixin(object):
     
     def __init__(self, *args, **kwargs):
         pass
@@ -35,25 +36,35 @@ class Authentication(object):
             self.session.terminate()
         return True
 
-class AjaxForm(object):
-    __isAjax = False
-    def initialize(self, request, response):
+class HtmlHelpersMixin(object):
+    def __init__(self, *args, **kwargs):
         pass
-        
-    def beginForm(self, action,name, method, successCallback="", failCallback=""):
-        result = """
-        <form id='%(name)s' action='%(action)s' method='%(method)s'>
-        return result%"""
-        pass
-    def endForm(self, name):
-        result="""</form>
-        <script type='text/javascript'>
-            %(jqstart)s
-                $('#%(name)s').ajaxForm({
-                 success:%(success)s,
-                 error:%(error)s
-                });
-            %(jqend)s
-        </script>
-        """
+    
+    class AjaxForm(object):
+        __isAjax = False
+        def initialize(self, request, response):
+            pass
+            
+        def beginForm(self, action,name, method, successCallback="", failCallback=""):
+            result = """
+            <form id='%(name)s' action='%(action)s' method='%(method)s'>
+            return result%"""
+            pass
+        def endForm(self, name):
+            result="""</form>
+            <script type='text/javascript'>
+                %(jqstart)s
+                    $('#%(name)s').ajaxForm({
+                     success:%(success)s,
+                     error:%(error)s
+                    });
+                %(jqend)s
+            </script>
+            """
+    Html = DynamicParameters({
+             'AjaxForm':HtmlHelpersMixin.AjaxForm,
+           })
+
+_ = 2
+
         
