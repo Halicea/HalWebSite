@@ -135,7 +135,7 @@
 		});
 	}
 	function loadMenus(selected){
-		$.post('/menu?op=index', function(data){
+		$.post('/menu?op=index_combo', function(data){
 			$('#selMenu').html(data);
 			$('#selMenu').val(selected);
 		});

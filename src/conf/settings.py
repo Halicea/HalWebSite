@@ -27,7 +27,7 @@ PLUGINS =\
        ("Contents", 'controllers.cmsControllers.CMSContentController'),
        ("Menus", 'controllers.cmsControllers.MenuController'),
        ("AjaxForm", 'lib.halicea.plugins.AjaxForm'), 
-       ("Authentication", 'lib.halicea.plugins.Authentication'),
+       ("Authentication", 'lib.halicea.plugins.AuthenticationMixin'),
     ]
 
 

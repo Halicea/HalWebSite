@@ -244,19 +244,56 @@ class ExtraContext(object):
 class CachedResource(object):
     @staticmethod
     def resName(res , request, *args, **kwargs):
-        return '__RESOURCE__'+request.__class__.__name__+'-'+res.__name__+'-'+str(args)+'-'+str(kwargs)
-    def __init__(self, time=0, namespace=None):
+        #fully identify the source by it's name
+        return '__RESOURCE__'+request.__module__+"."+request.__name__+'.'+res.__name__+\
+                        '('+\
+                            ','.join(set([\
+                                ','.join([str(x) for x in args]),\
+                                ','.join([x+'='+str(kwargs[x]) for x in kwargs.iterkeys()])
+                            ]))+\
+                        ')'
+    @staticmethod
+    def clear(action, *args, **kwargs):
+        cache.delete(CachedResource.resName(action, action.im_class, *args, **kwargs))
+        
+    def __init__(self, time=0, namespace=None, condition):
         self.namespace=namespace
         self.time=time
+        self.condition = condition
     def __call__(self, f):
         def new_f(request, *args, **kwargs):
-            resName = CachedResource.resName(f, request,*args, **kwargs)
-            res = cache.get(resName)
-            if not res:
-                res = f(request, *args, **kwargs)
-                cache.set(resName, res, self.time, namespace=self.namespace)
+            if not self.condition or self.condition(request, *args, **kwargs):
+                resName = CachedResource.resName(f, request.__class__,*args, **kwargs)
+                res = cache.get(resName)
+                if not res:
+                    res = f(request, *args, **kwargs)
+                    cache.set(resName, res, self.time, namespace=self.namespace)
                 return res
+            else:
+                return f(request, *args, **kwargs)
         CopyDecoratorProperties(f, new_f)
         return new_f
 
-    
+class ClearCacheAfter(object):
+    def __init__(self, action, params_function=None):
+        self.params_f = params_function or (lambda r, *args, **kwargs: ([],{}))
+        self.action = action
+    def __call__(self, f):
+        def new_f(request, *args, **kwargs):
+            res = f(request, *args, **kwargs)
+            args_p, kwargs_p = self.params_function(request, *args, **kwargs)
+            CachedResource.clear(self.action, *args_p, **kwargs_p)
+            return res
+        CopyDecoratorProperties(f, new_f)
+        return new_f
+class ClearCacheFirst(object):
+    def __init__(self, action, params_function=None):
+        self.params_f = params_function or (lambda r, *args, **kwargs: ([],{}))
+        self.action = action
+    def __call__(self, f):
+        def new_f(request, *args, **kwargs):
+            args_p, kwargs_p = self.params_function(request, *args, **kwargs)
+            CachedResource.clear(self.action, *args_p, **kwargs_p)
+            return f(request, *args, **kwargs)
+        CopyDecoratorProperties(f, new_f)
+        return new_f    

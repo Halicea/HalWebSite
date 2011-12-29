@@ -36,35 +36,34 @@ class AuthenticationMixin(object):
             self.session.terminate()
         return True
 
+class AjaxForm(object):
+    __isAjax = False
+    def initialize(self, request, response):
+        pass
+        
+    def beginForm(self, action,name, method, successCallback="", failCallback=""):
+        result = """
+        <form id='%(name)s' action='%(action)s' method='%(method)s'>
+        return result%"""
+        pass
+    def endForm(self, name):
+        result="""</form>
+        <script type='text/javascript'>
+            %(jqstart)s
+                $('#%(name)s').ajaxForm({
+                 success:%(success)s,
+                 error:%(error)s
+                });
+            %(jqend)s
+        </script>
+        """
+            
 class HtmlHelpersMixin(object):
     def __init__(self, *args, **kwargs):
         pass
     
-    class AjaxForm(object):
-        __isAjax = False
-        def initialize(self, request, response):
-            pass
-            
-        def beginForm(self, action,name, method, successCallback="", failCallback=""):
-            result = """
-            <form id='%(name)s' action='%(action)s' method='%(method)s'>
-            return result%"""
-            pass
-        def endForm(self, name):
-            result="""</form>
-            <script type='text/javascript'>
-                %(jqstart)s
-                    $('#%(name)s').ajaxForm({
-                     success:%(success)s,
-                     error:%(error)s
-                    });
-                %(jqend)s
-            </script>
-            """
     Html = DynamicParameters({
-             'AjaxForm':HtmlHelpersMixin.AjaxForm,
+             'AjaxForm':AjaxForm,
            })
-
-_ = 2
 
         

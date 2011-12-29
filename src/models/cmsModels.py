@@ -1,8 +1,7 @@
 from google.appengine.ext import db
 from BaseModels import Person
 import datetime as dt
-from lib.halicea.decorators import property
-
+from lib.halicea.decorators import property, CachedResource
 class CMSContent(db.Model):
     Title = db.StringProperty(required=True)
     HTMLContent = db.TextProperty(required=True)
@@ -98,9 +97,6 @@ class CMSLink(db.Model):
             self.Content.HasLinks = len(self.Content.Links)>0
             self.Content.put()
         #delete all the menus dependent on this links
-        menus = self.linkroot_menus.fetch(10)
-        if menus:
-            db.delete(menus)
         super(CMSLink,self).delete()
         return "Link Deleted"
     def put(self):

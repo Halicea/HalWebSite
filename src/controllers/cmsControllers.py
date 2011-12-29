@@ -33,7 +33,7 @@ class CMSLinksController(CMSBaseController):
             pass
         result ={'CMSContentForm': CMSContentForm(), 'MenuForm':CMSMenuForm(), };
         result.update(self.plugins.Contents.index())
-        result.update({'menu_list':self.plugins.Menus.index()}) 
+        result.update(self.plugins.Menus.index())
         return result
 
     @AdminOnly()
@@ -66,6 +66,10 @@ class CMSLinksController(CMSBaseController):
         if lnk:
             if lnk.Content and lnk.Content.content_cms_links.count()==1:
                 lnk.Content.delete()
+            menus = lnk.linkroot_menus.fetch(10)
+            if menus:
+                for menu in menus: CachedResource.clear(MenuController.view, menu.Name)
+                db.delete(menus)
             lnk.delete()
             self.status='Link is deleted'
         else:
@@ -96,18 +100,22 @@ class MenuController(CMSBaseController):
             return result.to_list(self.params)
         else:
             return "No Menu Found"
-        
+    
+    @CachedResource()
     def index(self,*args):
         return {'menus':cms.Menu.all()}
     
     @CachedResource()
     def index_combo(self,*args):
         combo_template ="<option value='{0}'>{0}</option>"
-        li_tempalte = "<li></li>"
+        li_template = "<li></li>"
         return "<option value='no_menu'>--Select Item--</option>"+'\r\n'.join([combo_template.replace("{0}",(x.Name)) for x in cms.Menu.all()])
-    
+
     def delete(self, key):
         menu = cms.Menu.get(key)
+        CachedResource.clear(MenuController.index)
+        CachedResource.clear(MenuController.index_combo)
+        CachedResource.clear(MenuController.view, menu.Name)
         menu.delete()
     @View(templateName='Menu_edit.html')
     def edit(self,*args):
@@ -121,6 +129,7 @@ class MenuController(CMSBaseController):
     
     @Post()
     @View(templateName='Menu_edit.html')
+    @ClearCacheAfter(CMSLinksController.index, lambda r: [],{})
     def save(self, *args):
         frm = CMSMenuForm(self.params)
         if frm.is_valid():
@@ -128,8 +137,11 @@ class MenuController(CMSBaseController):
             menu = cms.Menu.CreateNew(name=data["Name"], locationId="none", cssClass=None, creator=self.User)
             if data['key']:
                 menu = cms.Menu.get(data['key'])
+                CachedResource.clear(MenuController.view, menu.Name)
             menu.Name =  data["Name"]
             menu.put()
+            CachedResource.clear(MenuController.index)
+            CachedResource.clear(MenuController.index_combo)
             self.message ='Menu was saved'
             return None
         else:
