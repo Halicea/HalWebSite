@@ -105,7 +105,7 @@ class MenuController(CMSBaseController):
     def index(self,*args):
         return {'menus':cms.Menu.all()}
     
-    @CachedResource()
+    #@CachedResource()
     def index_combo(self,*args):
         combo_template ="<option value='{0}'>{0}</option>"
         li_template = "<li></li>"
@@ -129,7 +129,7 @@ class MenuController(CMSBaseController):
     
     @Post()
     @View(templateName='Menu_edit.html')
-    @ClearCacheAfter(CMSLinksController.index, lambda r: [],{})
+    @ClearCacheAfter(CMSLinksController.index, lambda r, *args, **kwargs: ([],{}) )
     def save(self, *args):
         frm = CMSMenuForm(self.params)
         if frm.is_valid():
@@ -164,6 +164,19 @@ class CMSContentController(CMSBaseController):
 
     @View(templateName = 'CMSContent.html')
     def index(self, *args):
+        limit = 10
+        offset = 0
+        try:
+            offset = int(self.params.offset)
+        except:
+            pass
+        contents = cms.CMSContent.all().order('-DateCreated').fetch(limit=limit, offset=offset)
+        if self.isAjax:
+            return '\r\n'.join(['<option value="%s">%s</option>'%(str(c.key()),c.Title) for c in contents])
+        else:
+            return {'contents':contents}
+
+    def index_li(self, *args):
         limit = 10
         offset = 0
         try:

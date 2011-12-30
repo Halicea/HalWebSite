@@ -36,10 +36,7 @@
 				$('#saveContent').resetForm();
 			},
 			open: function(){
-				if(cleditor==null)
-					cleditor = $('#id_Content').cleditor()[0];
-				//cleditor.refresh();	    
-				//cleditor.disable(false);
+				cleditor = $('#id_Content').cleditor()[0];
             },
             modal: true,
             height: 500,
@@ -141,7 +138,12 @@
 		});
 	}
 	function loadContents(selected){
-		alert("loading Contents");
+		$.post('/cms/contents?op=index', function(data){
+			$('#selContent').html(data);
+			$('#selContent').val(selected);
+			$('#selContent').trigger('change');
+		});
+		
 	}
 	function setTree(){
 		var templ = "<input type='radio' name='parentLink' value='${key}'>"

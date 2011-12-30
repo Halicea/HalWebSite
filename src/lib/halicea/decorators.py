@@ -256,13 +256,13 @@ class CachedResource(object):
     def clear(action, *args, **kwargs):
         cache.delete(CachedResource.resName(action, action.im_class, *args, **kwargs))
         
-    def __init__(self, time=0, namespace=None, condition):
+    def __init__(self, time=0, namespace=None, condition=None):
         self.namespace=namespace
         self.time=time
         self.condition = condition
     def __call__(self, f):
         def new_f(request, *args, **kwargs):
-            if not self.condition or self.condition(request, *args, **kwargs):
+            if not DEBUG and (not not self.condition or self.condition(request, *args, **kwargs)):
                 resName = CachedResource.resName(f, request.__class__,*args, **kwargs)
                 res = cache.get(resName)
                 if not res:
@@ -276,19 +276,26 @@ class CachedResource(object):
 
 class ClearCacheAfter(object):
     def __init__(self, action, params_function=None):
-        self.params_f = params_function or (lambda r, *args, **kwargs: ([],{}))
+        if params_function:
+            self.params_f = params_function
+        else:
+            self.params_f = lambda r, *args, **kwargs: ((),{})
         self.action = action
     def __call__(self, f):
         def new_f(request, *args, **kwargs):
             res = f(request, *args, **kwargs)
-            args_p, kwargs_p = self.params_function(request, *args, **kwargs)
+            args_p, kwargs_p = self.params_f(request, *args, **kwargs)
             CachedResource.clear(self.action, *args_p, **kwargs_p)
             return res
         CopyDecoratorProperties(f, new_f)
         return new_f
+    
 class ClearCacheFirst(object):
     def __init__(self, action, params_function=None):
-        self.params_f = params_function or (lambda r, *args, **kwargs: ([],{}))
+        if params_function:
+            self.params_f = params_function
+        else:
+            self.params_f = lambda r, *args, **kwargs: ((),{})
         self.action = action
     def __call__(self, f):
         def new_f(request, *args, **kwargs):

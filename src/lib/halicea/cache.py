@@ -5,6 +5,7 @@ if RUN =='appengine':
     from google.appengine.api import memcache
 else:
     from memcache import Client
+    #TODO: get it from the settings module 
     memcache = Client('localhost',1120)
 
 __cache__ = memcache

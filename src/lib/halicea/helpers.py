@@ -1,15 +1,16 @@
 from UserDict import DictMixin
-def ClassImport(name):
-    components = name.split('.')
-    mod = __import__('.'.join(components[:-1]), fromlist=[components[-1]])
-    klass = getattr(mod, components[-1])
-    return klass
 
 class NotSuportedException(Exception):
     def __init__(self, message):
         self.message = message or "Operation is not supported"
     def __str__(self):
         return self.message
+
+def ClassImport(name):
+    components = name.split('.')
+    mod = __import__('.'.join(components[:-1]), fromlist=[components[-1]])
+    klass = getattr(mod, components[-1])
+    return klass
     
 class DynamicParameters(object):
     dictObject = None
@@ -62,4 +63,3 @@ class LazyDict(DictMixin):
         del self.objects[key]
     def keys(self):
         return self.objects.keys()
-        
