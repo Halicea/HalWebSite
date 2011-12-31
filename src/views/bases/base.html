@@ -3,6 +3,7 @@
 {{block.super}}
 <link href="/styles/ui-silver/jquery-ui-1.7.2.custom.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="/styles/Style.css" rel="stylesheet" type="text/css" />
+<link href="/styles/superfish.css" rel="stylesheet" type="text/css" media="screen" />
 {% endblock %}
 
 {% block scripts %}
@@ -11,6 +12,8 @@
 <script type="text/javascript" src="/jscripts/jquery-ui-1.7.2.custom.min.js"></script>
 <script type="text/javascript" src="/jscripts/jquery.layout.js"></script>
 <script type="text/javascript" src="/jscripts/jquery.form.js"></script>
+<script type="text/javascript" src="/jscripts/hoverIntent.js" ></script>
+<script type="text/javascript" src="/jscripts/superfish.js" ></script>
 <script type="text/javascript">
 $(function(){
     $('input[name*="Date"]').datepicker();
@@ -19,20 +22,16 @@ $(function(){
 		 var o = $(this);
 		 o.next('div').toggle('fast');
 	});
-    //$('input[type="button"]')
+	$("a.commentLink").click(function () {
+        $("#comments").modal(
+        {
+            opacity: 60,
+            overlayCss: { backgroundColor: "Black" }
+        }
+        );
+    });
+    $('#menu_top_menu').superfish();
 });
-</script>
-<script type="text/javascript">
-        $(document).ready(function () {
-            $("a.commentLink").click(function () {
-                $("#comments").modal(
-                {
-                    opacity: 60,
-                    overlayCss: { backgroundColor: "Black" }
-                }
-                );
-            });
-        });
 </script>
 {% endblock %}
 {%block title%}Hal Web Framework{%endblock%}
@@ -50,7 +49,7 @@ $(function(){
 </script>
 {%endblock%}
 {% block top_menu %}
-	{% include mnTopMenu %}
+{%call this.plugins.Menus.view with 'top_menu' %}
 {% endblock %}
 
 {% block login_menu %}

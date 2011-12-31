@@ -6,7 +6,7 @@ import re
 os.environ['DJANGO_SETTINGS_MODULE']  = 'conf.settings'
 from google.appengine.dist import use_library
 use_library('django', '1.2')
-import google.appengine.ext.webapp.template
+from google.appengine.ext.webapp import template
 from django.conf import settings
 settings._target=None
 
@@ -14,7 +14,8 @@ from handlerMap import webapphandlers
 from google.appengine.ext.webapp.util import run_wsgi_app
 from lib.gaesessions import SessionMiddleware
 COOKIE_KEY = '''2zÆœ;¾±þ”¡j:ÁõkçŸÐ÷8{»Ën¿A—jÎžQAQqõ"bøó÷*%†™ù¹b¦$vš¡¾4ÇŸ^ñ5¦'''
-
+#register filters and tags
+template.register_template_library('lib.customFilters')
 #register Plugins
 from lib.halicea.plugins import *
 from lib.halicea.HalRequestHandler import HalRequestHandler

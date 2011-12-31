@@ -9,6 +9,10 @@ from lib import messages
 from django.utils import simplejson
 from models import cmsModels
 
+contentTypeViews={cmsModels.ContentType.CMSPage:'CMSPage.html',
+                  cmsModels.ContentType.CMSPage:'CMSPost.html',
+                  }
+
 class CMSBaseController(hrh):
     def __init__(self, *args, **kwargs):
         super(CMSBaseController, self).__init__(*args, **kwargs)
@@ -17,20 +21,15 @@ class CMSBaseController(hrh):
 class CMSLinksController(CMSBaseController):
     def __init__(self, *args, **kwargs):
         super(CMSLinksController, self).__init__(*args, **kwargs)
-        
-    @Handler(method='save', operation='save')
-    @Handler('LinksTree')
+    @ClearDefaults()
+    @Default('index')
+    @Handler('save')
+    @Handler('delete')
     def SetOperations(self):pass
     @AdminOnly()
     
     @View(templateName='CMSLinks.html')
     def index(self, menu='cms', *args):
-        limit = 100
-        offset = 0
-        try:
-            offset = int(self.params.offset)
-        except:
-            pass
         result ={'CMSContentForm': CMSContentForm(), 'MenuForm':CMSMenuForm(), };
         result.update(self.plugins.Contents.index())
         result.update(self.plugins.Menus.index())
@@ -57,9 +56,10 @@ class CMSLinksController(CMSBaseController):
         if True: #TODO: validation
             cms.CMSLink.CreateNew(addressName, name, parent, order, content, contentType, creator, _isAutoInsert=True)
         if self.isAjax:
-            return self.LinksTree(self.params.menu)
+            return self.plugins.Menus.view(self.params.menu)
         else:
             return self.index()
+    
     @AdminOnly()
     def delete(self, *args):
         lnk=cms.CMSLink.get(self.params.key)
@@ -75,14 +75,12 @@ class CMSLinksController(CMSBaseController):
         else:
             self.status="Link is invalid";
         return self.isAjax and self.status or self.redirect(self.get_url())
-
-    def LinksTree(self, menu):
-        return cms.Menu.get_by_key_name(menu).to_list()
-    
-    
 class MenuController(CMSBaseController):
+    
     def __init__(self, *args, **kwargs):
         super(MenuController, self).__init__(*args, **kwargs)
+        self.base = '/cms'
+    
     @ClearDefaults()
     @Default('view')
     @Handler('edit')
@@ -93,19 +91,40 @@ class MenuController(CMSBaseController):
     @Handler('delete')
     def SetOperations(self):pass
     
-    @CachedResource()
+    #@CachedResource()
     def view(self, menu='cms'): 
         result=  cms.Menu.get_by_key_name(menu)
         if result:
-            return result.to_list(self.params)
+            return self.__view_list__(result, self.params)
         else:
             return "No Menu Found"
     
+    def __view_list__(self, menu=None, params=None):  
+        id, name, cl, style = str(menu.key()), menu.Name, '', ''
+        noroot = False
+        if params:
+            name, cl, style = params.name or menu.Name, params.cl or cl, params.style or style 
+            noroot = False or params.noroot
+        template= "<ul id='menu_%(name)s' name='menu_%(name)s' class='%(class)s' style='%(style)s'>\n\t<li><a href='#' id='%(key)s'>Root</a><ul>%(rest)s<ul></li>\n</ul>"
+        result = "" 
+        for k in menu.LinkRoot.parent_link_cms_links.fetch(10):
+            result+=self.__renderNode__(k, 2)
+        if noroot:
+            return result
+        else:
+            return template%{'id':id, 'name':name, 'style':style, 'class':cl,'key':str(menu.LinkRoot.key()),'rest':result}
+    
+    def __renderNode__(self, node, spacer, circ_ref_stop=[]):
+        self.base
+        link = '\n'+('\t'*spacer)+"<li><a href='%(base)s/%(url)s' id='%(key)s'>%(name)s</a><ul>%(rest)s</ul></li>"
+        nodes_to_continue = [x for x in node.parent_link_cms_links if x.key().__str__() not in circ_ref_stop]
+        circ_ref_stop.extend([x.key().__str__() for x in nodes_to_continue])
+        return link%{'base':self.base, 'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':'\n'.join([self.__renderNode__(x, spacer+1, circ_ref_stop) for x in nodes_to_continue])}
+
     @CachedResource()
     def index(self,*args):
         return {'menus':cms.Menu.all()}
     
-    #@CachedResource()
     def index_combo(self,*args):
         combo_template ="<option value='{0}'>{0}</option>"
         li_template = "<li></li>"
@@ -117,6 +136,7 @@ class MenuController(CMSBaseController):
         CachedResource.clear(MenuController.index_combo)
         CachedResource.clear(MenuController.view, menu.Name)
         menu.delete()
+    
     @View(templateName='Menu_edit.html')
     def edit(self,*args):
         menu = None
@@ -134,7 +154,7 @@ class MenuController(CMSBaseController):
         frm = CMSMenuForm(self.params)
         if frm.is_valid():
             data = frm.clean()
-            menu = cms.Menu.CreateNew(name=data["Name"], locationId="none", cssClass=None, creator=self.User)
+            menu = cms.Menu.CreateNew(name=data["Name"], locationId="none", cssClass=None, creator=self.User, _isAutoInsert= True)
             if data['key']:
                 menu = cms.Menu.get(data['key'])
                 CachedResource.clear(MenuController.view, menu.Name)
@@ -146,8 +166,7 @@ class MenuController(CMSBaseController):
             return None
         else:
             return {'MenuForm':frm}
-        
-         
+
 class CMSContentController(CMSBaseController):
     def __init__(self, *args, **kwargs):
         super(CMSContentController, self).__init__(*args, **kwargs)
@@ -261,19 +280,20 @@ class CMSPageController(CMSBaseController):
         super(CMSPageController,self).__init__(*args, **kwargs)
     @ClearDefaults()
     @Default('index')
-    @Handler('view', 'view')
+    @Handler('view')
     def SetOperations(self):pass
-
-    def view(self, pagepath):
-        lnk = cms.CMSLink.GetLinkByPath(pagepath)
+    
+    def view(self, url):
+        lnk = cms.CMSLink.GetLinkByPath(url)
         if lnk:
+            self.SetTemplate(templateName=contentTypeViews[lnk.ContentTypeNumber])
             return {'link':lnk}
         else:
             self.status ="Not Valid Page"
             self.redirect(LoginController.get_url())
+    
     @View(templateName='CMSPage_index.html')
     def index(self, tag=None):
-
         limit = int(self.params.limit or 20)
         offset = int(self.params.offset or 0)
         if not tag:
@@ -286,59 +306,3 @@ class CMSPageController(CMSBaseController):
                 links+=x
             links = db.get(list(set(links)))
             return {'links':links}
-
-class CommentController(CMSBaseController):
-    def __init__(self,*args, **kwargs):
-        super(CommentController).__init__(*args, **kwargs)
-
-    @Default('save')
-    def SetOperations(self): pass
-
-    def save(self, key):
-        if self.params.Comment:
-            Comment.CreateNew(self.params.Comment, self.User, cms.CMSContent.get(key), _isAutoInsert=True)
-            self.status = 'Comment is saved'
-        else:
-            self.status = 'No Comment was given'
-        if self.isAjax:
-            simplejson.dumps({'status':self.status})
-        else:
-            self.redirect(CMSContentController.get_url(), permanent=True)
-
-    def delete(self,*args):
-        if self.params.key:
-            item = Comment.get(self.params.key)
-            if item:
-                item.delete()
-                self.status ='Comment is deleted!'
-            else:
-                self.status='Comment does not exist'
-        else:
-            self.status = 'Key was not Provided!'
-        self.redirect(CommentController.get_url())
-
-    def index(self, *args):
-        results =None
-        index = 0; count=20
-        try:
-            index = int(self.params.index)
-            count = int(self.params.count)
-        except:
-            pass
-        nextIndex = index+count;
-        previousIndex = index<=0 and -1 or (index-count>0 and 0 or index-count)
-        result = {'CommentList': Comment.all().fetch(limit=count, offset=index)}
-        result.update(locals())
-        return result
-
-    def edit(self, *args):
-        if self.params.key:
-            item = Comment.get(self.params.key)
-            if item:
-                return {'op':'update', 'CommentForm': CommentForm(instance=item)}
-            else:
-                self.status = 'Comment does not exists'
-                self.redirect(CommentController.get_url())
-        else:
-            self.status = 'Key not provided'
-            return {'op':'insert' ,'CommentForm':CommentForm()}

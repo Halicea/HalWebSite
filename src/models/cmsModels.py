@@ -45,7 +45,8 @@ class ContentType:
     StaticPage = 1
     NoContent = 2
     Post = 3
-
+    BlogPost=4
+    
 class CMSLink(db.Model):
     """Link have parent link, have contant and come with several variations depending on the content type:
         1. CMSPage
@@ -65,13 +66,13 @@ class CMSLink(db.Model):
     LastDateModified =db.DateTimeProperty(auto_now=True)
     
     def __str__(self):
-        return self.ParentLink or "None"+"/"+self.AddressName
+        return self.Url()
     
     def GetChildren(self):
         return CMSLink.gql("WHERE Depth =:depth AND ParentLink =:pl", depth=self.Depth+1, pl=self).fetch(limit=1000)
 
     def Url(self):
-        if self.ContentTypeNumber == ContentType.CMSPage:
+        if self.ContentTypeNumber != ContentType.StaticPage:
             result=self.AddressName
             cur_ln = self.ParentLink
             while cur_ln:
@@ -116,9 +117,9 @@ class CMSLink(db.Model):
             curPar = CMSLink.get_by_key_name(items[0])
         if len(items)>1:
             i=1
-            for lnkStr in items:
-                new_item = CMSLink.gql("WHERE Depth =:depth AND ParentLink =:pl AND AddressName =:address",depth=i, pl=curPar, address=lnkStr).get()
-                if new_item: 
+            for lnkStr in items[1:]:
+                new_item = CMSLink.gql("WHERE ParentLink =:pl AND AddressName =:address", pl=curPar, address=lnkStr).get()
+                if new_item:
                     curPar = new_item
                 else:
                     curPar = None
@@ -141,7 +142,8 @@ class CMSLink(db.Model):
             addressName = name
         if contentType==ContentType.NoContent:
             additionalUrl = ""
-        result = cls(parent=parentLink, key_name=addressName, AddressName=addressName, 
+        
+        result = cls(parent=parentLink, AddressName=addressName, 
                      AdditionalUrl=additionalUrl, Name=name, ContentTypeNumber=contentType, 
                      ParentLink=parentLink, Depth=depth, Order=order, 
                      Content=content, Creator=creator)
@@ -185,27 +187,6 @@ class Menu(db.Model):
     def delete(self):
         self.LinkRoot.delete()
         super(Menu, self).delete()
-    def to_list(self, params=None):
-        id, name, cl, style = str(self.key()), self.Name, '', ''
-        noroot = False
-        if params:
-            name, cl, style = params.name or self.Name, params.cl or cl, params.style or style 
-            noroot = False or params.noroot
-        template= "<ul id='menu_%(name)s' name='menu_%(name)s' class='%(class)s' style='%(style)s'>\n\t<li><a href='#' id='%(key)s'>Root</a><ul>%(rest)s<ul></li>\n</ul>"
-        result = "" 
-        for k in self.LinkRoot.parent_link_cms_links.fetch(10):
-            result+=self.__renderNode__(k, 2)
-        if noroot:
-            return result
-        else:
-            return template%{'id':id, 'name':name, 'style':style, 'class':cl,'key':str(self.LinkRoot.key()),'rest':result}
-    
-    def __renderNode__(self, node, spacer, circ_ref_stop=[]):
-        link = '\n'+('\t'*spacer)+"<li><a href='%(url)s' id='%(key)s'>%(name)s</a><ul>%(rest)s</ul></li>"
-        nodes_to_continue = [x for x in node.parent_link_cms_links if x.key().__str__() not in circ_ref_stop]
-        circ_ref_stop.extend([x.key().__str__() for x in nodes_to_continue])
-        return link%{'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':'\n'.join([self.__renderNode__(x, spacer+1, circ_ref_stop) for x in nodes_to_continue])}
-    
     def __str__(self):
         return self.Name
     

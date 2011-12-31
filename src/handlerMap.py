@@ -30,15 +30,10 @@ webapphandlers = [
 ('/cms/content/(.*)', cmsControllers.CMSContentController),
 #links page
 ('/cms/links', cmsControllers.CMSLinksController),
-
-#comments for a specific page (add, edit and display(Not used now)
-('/cms/page/(.*)/comment', cmsControllers.CommentController.new_factory(op='edit')),
-('/cms/page/(.*)/comments', cmsControllers.CommentController.new_factory(op='index')),
-
-#display a link
-('/cms/page/(.*)', cmsControllers.CMSPageController.new_factory(op='view')),
 #display pages by tag
 ('/cms/tag/(.*)', cmsControllers.CMSPageController.new_factory(op='index')),
+#display a link
+('/cms/(.*)', cmsControllers.CMSPageController.new_factory(op='view')),
 #display latest pages
 ('/', cmsControllers.CMSPageController.new_factory(op='index')),
 #menus controllers , singlemenu by name

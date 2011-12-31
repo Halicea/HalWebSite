@@ -21,6 +21,7 @@ class HalRequestHandler( webapp.RequestHandler ):
            - {{status}} - returning the self.status variable (also stored in session and useful for redirects)
            - {{current_server}} -responding the server url
            - {{current_url}}
+           - {{this}}
     """
     def __init__(self, *args, **kwargs):
         self.params = None
@@ -315,7 +316,7 @@ class HalRequestHandler( webapp.RequestHandler ):
         if not result.has_key('op'):
             result['op'] = self.op
         if not result.has_key('request'):
-            result['request']=self
+            result['this']=self
         #update the variables
         result.update(paths.GetBasesDict())
         result.update(paths.GetBlocksDict())

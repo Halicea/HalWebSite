@@ -115,9 +115,13 @@ class Handler(object):
 class View(object):
     def __init__(self, **template):
         self.template = template
+        
     def __call__(self, f):
         def new_f(request, *args, **kwargs):
-            request.SetTemplate(**self.template)
+            if(hasattr(self.template, '__call__')):
+                request.SetTemplate(**self.template(request, *args, **kwargs))
+            else:
+                request.SetTemplate(**self.template)
             return f(request, *args, **kwargs)
         CopyDecoratorProperties(f, new_f)
         return new_f

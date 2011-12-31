@@ -1,5 +1,5 @@
 {%for m in menus%}
-  <a href="#" class='expandme' name='{{m.Name}}' id="{{m.Name}}">{{m.Name}}</a>
+  <a href="/menu/{{m.Name}}" class='expandme' name='{{m.Name}}' id="{{m.Name}}">{{m.Name}}</a>
 {%endfor%}
 <script type="text/javascript">
 $(function(){
