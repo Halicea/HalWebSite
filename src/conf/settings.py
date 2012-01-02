@@ -55,6 +55,7 @@ JSCRIPTS_DIR = join(STATIC_DATA_DIR, 'jscripts')
 IMAGES_DIR = join(STATIC_DATA_DIR, 'images')
 STYLES_DIR = join(STATIC_DATA_DIR, 'styles')
 HANDLER_MAP_FILE = join(PROJ_LOC, 'handlerMap.py')
+TESTS_DIR = join(PROJ_LOC, 'tests')
 #End MVC Directories
 
 #MVC Sufixes
@@ -75,9 +76,6 @@ CONTROLLER_EXTENSTION = '.py'
 MODEL_EXTENSTION = '.py'
 MODEL_FORM_EXTENSTION = '.py'
 VIEW_EXTENSTION = '.html'
-
-template_debug=True
-show_errors = True
 MagicLevel = 3
 
 
