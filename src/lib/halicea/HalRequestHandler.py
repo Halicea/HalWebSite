@@ -9,12 +9,19 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 from lib.NewsFeed import NewsFeed
+import simplejson
 templateGroups = {'form':settings.FORM_VIEWS_DIR,
                   'page':settings.PAGE_VIEWS_DIR,
                   'block':settings.BLOCK_VIEWS_DIR,
                   'base':settings.BASE_VIEWS_DIR,}
-
-class HalRequestHandler( webapp.RequestHandler ):
+ContentTypes={
+               'json':'application/json',
+               'xml':'application/xml',
+               'html':'text/html'
+             }
+ContentTypes_reverse=dict([(ContentTypes[x], x) for x in ContentTypes.keys()])
+               
+class HalRequestHandler(webapp.RequestHandler ):
     """Base Request handler class for the Hal framework.
         Note: standard items that are responded in the context are:
            - {{current_user}}
@@ -24,6 +31,7 @@ class HalRequestHandler( webapp.RequestHandler ):
            - {{this}}
     """
     def __init__(self, *args, **kwargs):
+        super(HalRequestHandler, self).__init__(*args, **kwargs)
         self.params = None
         self.operations = {}
         #setattr(self.operations, 'update', self.upd)
@@ -31,16 +39,19 @@ class HalRequestHandler( webapp.RequestHandler ):
         self.TemplateType = ''
         self.status = None
         self.isAjax=False
+        self.responseType = 'html'
+        self.requestType='html'
         
         if kwargs and kwargs.has_key('op'):
             self.op =kwargs['op']
         else:
-            self.op = None 
+            self.op = None
         self.method = 'GET'
         self.__templateIsSet__= False
         self.__template__ =""
         self.extra_context ={}
     # Constructors
+    
     def initialize( self, request, response):
         """Initializes this request handler with the given Request and Response.
            Set the Default Plugins and Handlers
@@ -49,20 +60,27 @@ class HalRequestHandler( webapp.RequestHandler ):
         self.request = request
         self.response = response
         #TODO: finish this part with the dynamic dict
-#        if self.request.headers.environ.get('CONTENT_TYPE') == 'application/json':
-#            data = simplejson.loads(self.request.body)
-#            #TODO handle the parameters
-#            self.params = DynamicParameters(RequestDictMixin(self.request))
-#        elif self.request.headers.environ.get('CONTENT_TYPE') == 'application/xml':
+        
+        if ContentTypes_reverse.has_key(self.request.headers.environ.get('CONTENT_TYPE')):
+            self.requestType =ContentTypes_reverse[self.request.headers.environ.get('CONTENT_TYPE')]
+        else:
+            self.requestType = ContentTypes['html']
+            
+        if self.requestType =='json':
+            data = simplejson.loads(self.request.body)
+            self.params = DynamicParameters(data)
+#        elif self.requestType=='xml':
 #            data = serializers.deserialize('xml', self.request.body)
 #            #TODO handle the parameters
 #            self.params = DynamicParameters(RequestDictMixin(self.request))
-#        else:
-        if True: self.params = DynamicParameters(RequestDictMixin(self.request))
+        else:
+            self.params = DynamicParameters(RequestDictMixin(self.request))
+        self.method = self.request.environ['METHOD']
         self.isAjax = ((request.headers.environ.get('HTTP_X_REQUESTED_WITH')=='XMLHttpRequest') or (request.headers.get('X-Requested-With')=='XMLHttpRequest'))
         if not self.isAjax: self.isAjax = self.params.isAjax=='true'
-        if self.session.has_key( 'status' ): self.status = self.session.pop('status')
-
+        if self.session:
+            if self.session.has_key( 'status' ): self.status = self.session.pop('status')
+        
         #set the default operations
         self.SetDefaultOperations()
         self.SetOperations()
@@ -244,28 +262,29 @@ class HalRequestHandler( webapp.RequestHandler ):
 
     def respond( self, item={}, *args ):
         #self.response.out.write(self.Template+'<br/>'+ dict)
-        if isinstance(item, str):
-            self.__respond(item)
-        elif isinstance(item, dict):
-            #commented is jinja implementation of the renderer 
-            #tmpl = env.get_template(self.Template)
-            #self.response.out.write(tmpl.render(self.__render_dict(item)))
-            self.__respond( template.render( self.Template, self.__render_dict( item ),
-                                                  debug = settings.TEMPLATE_DEBUG ))
-        elif isinstance(item,list):
-            return self.__respond('<ul>'+'\n'.join(['<li>'+str(x)+'</li>' for x in item])+'</ul>')
-        elif isinstance(item,db.Model):
-            return self.__respond(item.to_xml())
-        elif isinstance(item, NewsFeed):
-            self.response.headers["Content-Type"] = "application/xml; charset=utf-8"
-            #commented is jinja implementation of the renderer 
-            #tmpl = env.get_template(os.path.join(settings.TEMPLATE_DIRS, 'RssTemplate.txt'))
-            #self.response.out.write(tmpl.render({'m':item}))
-            self.__respond(template.render(os.path.join(settings.TEMPLATE_DIRS, 'RssTemplate.txt'),
-                            {'m':item}, debug=settings.DEBUG))
-        else:
-            self.__respond(str(item))
-            
+        if self.responseType =='html':
+            if isinstance(item, str):
+                self.__respond(item)
+                
+            elif isinstance(item, dict):
+                #commented is jinja implementation of the renderer 
+                #tmpl = env.get_template(self.Template)
+                #self.response.out.write(tmpl.render(self.__render_dict(item)))
+                self.__respond( template.render( self.Template, self.__render_dict( item ),
+                                                      debug = settings.TEMPLATE_DEBUG ))
+            elif isinstance(item,list):
+                return self.__respond('<ul>'+'\n'.join(['<li>'+str(x)+'</li>' for x in item])+'</ul>')
+            elif isinstance(item,db.Model):
+                return self.__respond(item.to_xml())
+            elif isinstance(item, NewsFeed):
+                self.response.headers["Content-Type"] = "application/xml; charset=utf-8"
+                self.__respond(template.render(os.path.join(settings.TEMPLATE_DIRS, 'RssTemplate.txt'),
+                                {'m':item}, debug=settings.DEBUG))
+            else:
+                self.__respond(str(item))
+        if self.responseType =='json':
+            self.__respond(simplejson.dumps(item))
+
     def respond_static(self, text):
         self.__respond(text)
         
@@ -274,7 +293,7 @@ class HalRequestHandler( webapp.RequestHandler ):
         if innerdict.has_key( 'status' ):
             self.status = innerdict['status']
             del innerdict['status']
-        if self.status:
+        if self.status and self.session:
             self.session['status']=self.status
         if uri=='/Login' and not self.request.url.endswith('/Logout'):
             innerdict['redirect_url']=self.request.url
@@ -330,3 +349,8 @@ class HalRequestHandler( webapp.RequestHandler ):
         else:
             self.mobile = False
         return result
+    def respondWith(self, responseType):
+        """responseType can be ['json', 'html', 'xml']]"""
+        if ContentTypes.has_key(responseType):
+            self.responseType = responseType
+            self.response.headers['Content-Type'] = ContentTypes[responseType]

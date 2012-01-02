@@ -9,7 +9,7 @@ SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
 class ModelToDict(object):
     """Callable to convert an appengine Model to a Dictionary that can be 
        then easy represented with Json or Xml
-    """ 
+    """
     def __call__(self, model):
         output = {}
         for key, prop in model.properties().iteritems():

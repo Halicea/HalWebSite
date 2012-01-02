@@ -8,12 +8,15 @@ import os.path as p
 from os.path import join as pjoin
 import conf.settings as settings
 from lib.halicea import cache
+
 os.path.sep = '/'
 os.pathsep = '/'
+
 
 def GetTemplateDir(template_type):
     # @type template_type:str
     return p.join(settings.PAGE_VIEWS_DIR, template_type)
+
 
 def getViewsDict(directory, base=''):
     result = {}
@@ -28,14 +31,17 @@ def getViewsDict(directory, base=''):
         memResult = result
     return memResult
 
+
 def GetBasesDict():
     result = getViewsDict(settings.BASE_VIEWS_DIR, settings.VIEWS_RELATIVE_DIR)
     return result
+
 
 def GetBlocksDict():
     result = getViewsDict(settings.BLOCK_VIEWS_DIR, settings.VIEWS_RELATIVE_DIR)
     result.update(__blocksDict__)
     return result
+
 
 def GetFormsDict(dir):
     result = getViewsDict(p.join(settings.FORM_VIEWS_DIR, dir), settings.VIEWS_RELATIVE_DIR)

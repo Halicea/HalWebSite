@@ -1,0 +1,18 @@
+{%extends base %}
+{%block content%}
+    <div class="post">
+       <div class="postContent">
+            {%autoescape off%}{{link.Content.HTMLContent}}{%endautoescape%}
+       </div>
+       {%comment%}
+       <div class="postFooter">
+            <div class="nav">
+                Created by {{link.Content.Creator.Name}} {{link.Content.Creator.Surname}} on {{link.Content.DateCreated}}
+            </div>
+       </div>
+       <div class="postComments">
+            <div class="fb-comments" data-href="http://{{current_server}}/cms/page/{{link.AddressName}}" data-num-posts="5" data-width="500"></div>
+       </div>
+       {%endcomment%}
+    </div>
+{% endblock %}

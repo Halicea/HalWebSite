@@ -35,7 +35,7 @@ webapphandlers = [
 #display a link
 ('/cms/(.*)', cmsControllers.CMSPageController.new_factory(op='view')),
 #display latest pages
-('/', cmsControllers.CMSPageController.new_factory(op='index')),
+('/', cmsControllers.CMSPageController.new_factory(op='index', menu='pages')),
 #menus controllers , singlemenu by name
 ('/menu/(.*)', cmsControllers.MenuController.new_factory(op='view')),
 ('/menu', cmsControllers.MenuController),

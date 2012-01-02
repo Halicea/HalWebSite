@@ -3,21 +3,25 @@ from models.BaseModels import Person
 from lib.halicea.helpers import DynamicParameters
 
 class AuthenticationMixin(object):
-    
     def __init__(self, *args, **kwargs):
-        pass
+        self.Impersonated=None
     def __getSession__(self):
         return get_current_session()
+    
     session = property(__getSession__)
     def GetUser(self):
         if self.session and self.session.is_active():
             return self.session.get('user', default=None)
         else:
             return None
-
+    
     @property
     def User(self):
-        return self.GetUser()
+        if self.Impersonated:
+            return self.Impersonated
+        else:
+            return self.GetUser()
+
     def login_user_local(self, uname, passwd):
         self.logout_user()
         user = Person.GetUser(uname, passwd, 'local')

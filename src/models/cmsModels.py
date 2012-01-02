@@ -1,7 +1,8 @@
 from google.appengine.ext import db
 from BaseModels import Person
 import datetime as dt
-from lib.halicea.decorators import property, CachedResource
+from lib.halicea.decorators import property
+from lib.halicea.HalRequestHandler import ContentTypes
 class CMSContent(db.Model):
     Title = db.StringProperty(required=True)
     HTMLContent = db.TextProperty(required=True)
@@ -72,7 +73,7 @@ class CMSLink(db.Model):
         return CMSLink.gql("WHERE Depth =:depth AND ParentLink =:pl", depth=self.Depth+1, pl=self).fetch(limit=1000)
 
     def Url(self):
-        if self.ContentTypeNumber != ContentType.StaticPage:
+        if self.ContentTypeNumber not in [ContentType.StaticPage, ContentType.NoContent]:
             result=self.AddressName
             cur_ln = self.ParentLink
             while cur_ln:
@@ -81,7 +82,9 @@ class CMSLink(db.Model):
                     result = cur_ln.AddressName+'/'+result
                 cur_ln = cur_ln.ParentLink
             return result
-        else:
+        elif self.ContentTypeNumber == ContentType.NoContent:
+            return "#"
+        elif self.ContentTypeNumber == ContentType.StaticPage:
             return self.AdditionalUrl
         
     def GetTreeBelow(self, ignoreAddresses=[]):
@@ -114,7 +117,7 @@ class CMSLink(db.Model):
         items = [p for p in path.split('/') if p]
         curPar=None
         if items:
-            curPar = CMSLink.get_by_key_name(items[0])
+            curPar = Menu.get_by_key_name(items[0]).LinkRoot
         if len(items)>1:
             i=1
             for lnkStr in items[1:]:
@@ -140,7 +143,7 @@ class CMSLink(db.Model):
         if contentType == ContentType.StaticPage:
             additionalUrl = addressName
             addressName = name
-        if contentType==ContentType.NoContent:
+        elif contentType==ContentType.NoContent:
             additionalUrl = ""
         
         result = cls(parent=parentLink, AddressName=addressName, 
@@ -153,15 +156,7 @@ class CMSLink(db.Model):
     @classmethod
     def GetLinkTree(cls, menu='cms'):
         root = CMSLink.get_by_key_name(menu)
-        if not root:
-            root = CMSLink.CreateNew2('/cms', 'Root', None, -1, None, None, _isAutoInsert=False)
         return root.GetTreeBelow({})
-#        tree = cls.gql('WHERE Depth =:d', d=-1).fetch(limit=1000, offset=0)
-#        result = {} 
-#        # get the root nodes
-#        for t in tree:
-#            result[t] = t.GetTreeBelow()
-#        return result
     ## End Static Methods
     
 class Menu(db.Model):

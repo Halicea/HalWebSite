@@ -43,10 +43,21 @@
             width: 600});
 		
 		setTree();
-		$('#frmNewLink').ajaxForm(function(data){
-			$('#divTree').html(data);
-			setTree();
-        });
+		$('#frmNewLink').ajaxForm({
+			success:function(data){
+				if(data.errors.length>0){
+					alert(data.errors);	
+				}else{
+				    $('#divTree').html(data.tree);
+				    setTree();
+				    alert('link is saved');
+				}
+		    },
+			error:function(err){
+				alert('error'+err.toString());
+			}
+		});
+		
 		$('#saveMenu input[type="button"]').click(function(){
 			saveMenu();
 			loadMenus(activeMenu);
@@ -139,7 +150,8 @@
 	}
 	function loadContents(selected){
 		$.post('/cms/contents?op=index', function(data){
-			$('#selContent').html(data);
+			var firstItem = '<option selected="selected" type="static" value="">Static Url</option>';
+			$('#selContent').html(firstItem+'\r\n'+data);
 			$('#selContent').val(selected);
 			$('#selContent').trigger('change');
 		});

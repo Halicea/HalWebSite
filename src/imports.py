@@ -19,6 +19,7 @@ template.register_template_library('lib.customFilters')
 #register Plugins
 from lib.halicea.plugins import *
 from lib.halicea.HalRequestHandler import HalRequestHandler
+
 HalRequestHandler.extend(
     AuthenticationMixin,
     HtmlHelpersMixin

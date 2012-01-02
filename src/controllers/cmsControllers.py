@@ -9,9 +9,10 @@ from lib import messages
 from django.utils import simplejson
 from models import cmsModels
 
-contentTypeViews={cmsModels.ContentType.CMSPage:'CMSPage.html',
+contentTypeViews={
+                  cmsModels.ContentType.CMSPage:'CMSPage.html',
                   cmsModels.ContentType.CMSPage:'CMSPost.html',
-                  }
+                 }
 
 class CMSBaseController(hrh):
     def __init__(self, *args, **kwargs):
@@ -39,27 +40,43 @@ class CMSLinksController(CMSBaseController):
     def save(self, *args):
         addressName = self.params.addressName
         name=self.params.name
-        parent=self.params.parentLink
-        if parent:
-            parent = cms.CMSLink.get(parent)
+        parent= None
+        errors = []
+        if self.params.parentLink:
+            parent = cms.CMSLink.get(self.params.parentLink)
+        
+        if not parent:
+            errors.append('Parrent Does not exists')
+        
+        isUnique =not cms.CMSLink.gql("WHERE ParentLink = :l and AddressName = :a", l=parent, a=addressName).get()
+        if not isUnique:
+            errors.append('Error: There is Already ')
+        
+        if not errors:
+            order= int(self.g('order'))
+            content=self.params.content or None
+            contentType = cms.ContentType.StaticPage
+            if content:
+                content = cms.CMSContent.get(content)
+                contentType=cms.ContentType.CMSPage
+            if not self.params.HasContent:
+                contentType = cms.ContentType.NoContent
+            creator= self.User
+            if True: #TODO: validation
+                cms.CMSLink.CreateNew(addressName, name, parent, order, content, contentType, creator, _isAutoInsert=True)
+            if self.isAjax:
+                self.respondWith('json')
+                return {'tree':self.plugins.Menus.view(self.params.menu), 'errors':[]}
+            else:
+                return self.index()
         else:
-            parent = None
-        order= int(self.g('order'))
-        content=self.params.content or None
-        contentType = cms.ContentType.StaticPage
-        if content:
-            content = cms.CMSContent.get(content)
-            contentType=cms.ContentType.CMSPage
-        if not self.params.HasContent:
-            contentType = cms.ContentType.NoContent
-        creator= self.User
-        if True: #TODO: validation
-            cms.CMSLink.CreateNew(addressName, name, parent, order, content, contentType, creator, _isAutoInsert=True)
-        if self.isAjax:
-            return self.plugins.Menus.view(self.params.menu)
-        else:
-            return self.index()
-    
+            self.status = ','.join(errors)
+            if self.isAjax:
+                self.respondWith('json')
+                return {'errors':errors, 'tree':''}
+            else:
+                self.redirect(self.request.url)
+        
     @AdminOnly()
     def delete(self, *args):
         lnk=cms.CMSLink.get(self.params.key)
@@ -79,8 +96,7 @@ class MenuController(CMSBaseController):
     
     def __init__(self, *args, **kwargs):
         super(MenuController, self).__init__(*args, **kwargs)
-        self.base = '/cms'
-    
+        self.base = '/cms/'
     @ClearDefaults()
     @Default('view')
     @Handler('edit')
@@ -91,52 +107,57 @@ class MenuController(CMSBaseController):
     @Handler('delete')
     def SetOperations(self):pass
     
-    #@CachedResource()
-    def view(self, menu='cms'): 
+    @Cached()
+    def view(self, menu='cms', noRoot=False): 
         result=  cms.Menu.get_by_key_name(menu)
         if result:
-            return self.__view_list__(result, self.params)
+            return self.__view_list__(result, noRoot, self.params)
         else:
             return "No Menu Found"
     
-    def __view_list__(self, menu=None, params=None):  
+    def __view_list__(self, menu=None, noRoot=False, params=None):  
         id, name, cl, style = str(menu.key()), menu.Name, '', ''
-        noroot = False
+        noroot = noRoot
         if params:
             name, cl, style = params.name or menu.Name, params.cl or cl, params.style or style 
-            noroot = False or params.noroot
-        template= "<ul id='menu_%(name)s' name='menu_%(name)s' class='%(class)s' style='%(style)s'>\n\t<li><a href='#' id='%(key)s'>Root</a><ul>%(rest)s<ul></li>\n</ul>"
+            noroot = noroot or params.noroot
+        template= "<ul id='menu_%(name)s' name='menu_%(name)s' class='%(class)s' style='%(style)s'>\n\t%(rest)s\n</ul>"
         result = "" 
         for k in menu.LinkRoot.parent_link_cms_links.fetch(10):
             result+=self.__renderNode__(k, 2)
         if noroot:
-            return result
+            return template%{'id':id, 'name':name, 'style':style, 'class':cl,'rest':result}
         else:
-            return template%{'id':id, 'name':name, 'style':style, 'class':cl,'key':str(menu.LinkRoot.key()),'rest':result}
+            result = "<li><a href='#' id='%(key)s'>Root</a><ul>"%{'key':str(menu.LinkRoot.key())}+result+"<ul></li>"
+            return template%{'id':id, 'name':name, 'style':style, 'class':cl,'rest':result}
     
-    def __renderNode__(self, node, spacer, circ_ref_stop=[]):
-        self.base
-        link = '\n'+('\t'*spacer)+"<li><a href='%(base)s/%(url)s' id='%(key)s'>%(name)s</a><ul>%(rest)s</ul></li>"
-        nodes_to_continue = [x for x in node.parent_link_cms_links if x.key().__str__() not in circ_ref_stop]
-        circ_ref_stop.extend([x.key().__str__() for x in nodes_to_continue])
-        return link%{'base':self.base, 'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':'\n'.join([self.__renderNode__(x, spacer+1, circ_ref_stop) for x in nodes_to_continue])}
+    def __renderNode__(self, node, spacer):
+        link = '\n'+('\t'*spacer)+"<li><a href='%(base)s%(url)s' id='%(key)s'>%(name)s</a>%(rest)s</li>"
+        #nodes_to_continue = [x for x in node.parent_link_cms_links if x.key().__str__() not in circ_ref_stop]
+        #circ_ref_stop.extend([x.key().__str__() for x in nodes_to_continue])
+        children  =node.parent_link_cms_links
+        rest = '\n'.join([self.__renderNode__(x, spacer+1) for x in children])
+        base =  self.base
+        if node.ContentTypeNumber in [cms.ContentType.StaticPage, cms.ContentType.NoContent]:
+            base = ""
+        return link%{'base':base, 'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':rest and '<ul>'+rest+'</ul>' or ''}
 
-    @CachedResource()
+    @Cached()
     def index(self,*args):
-        return {'menus':cms.Menu.all()}
+        return {'menus':cms.Menu.all().fetch(100)}
     
     def index_combo(self,*args):
         combo_template ="<option value='{0}'>{0}</option>"
         li_template = "<li></li>"
         return "<option value='no_menu'>--Select Item--</option>"+'\r\n'.join([combo_template.replace("{0}",(x.Name)) for x in cms.Menu.all()])
 
-    def delete(self, key):
-        menu = cms.Menu.get(key)
-        CachedResource.clear(MenuController.index)
-        CachedResource.clear(MenuController.index_combo)
-        CachedResource.clear(MenuController.view, menu.Name)
+#    @ClearCacheAfter('controllers.cmsControllers.MenuController.index')
+#    @ClearCacheAfter('controllers.cmsControllers.MenuController.index_combo')
+#    @ClearCacheAfter('controllers.cmsControllers.MenuController.view', lambda r, name:name)
+    def delete(self, name):
+        menu = cms.Menu.get_by_key_name(name)
         menu.delete()
-    
+
     @View(templateName='Menu_edit.html')
     def edit(self,*args):
         menu = None
@@ -149,7 +170,8 @@ class MenuController(CMSBaseController):
     
     @Post()
     @View(templateName='Menu_edit.html')
-    @ClearCacheAfter(CMSLinksController.index, lambda r, *args, **kwargs: ([],{}) )
+    @RespondWith('json')
+    @ClearCacheAfter(CMSLinksController.index)
     def save(self, *args):
         frm = CMSMenuForm(self.params)
         if frm.is_valid():
@@ -157,15 +179,15 @@ class MenuController(CMSBaseController):
             menu = cms.Menu.CreateNew(name=data["Name"], locationId="none", cssClass=None, creator=self.User, _isAutoInsert= True)
             if data['key']:
                 menu = cms.Menu.get(data['key'])
-                CachedResource.clear(MenuController.view, menu.Name)
+                Cached.clear(MenuController.view, menu.Name)
             menu.Name =  data["Name"]
             menu.put()
-            CachedResource.clear(MenuController.index)
-            CachedResource.clear(MenuController.index_combo)
-            self.message ='Menu was saved'
-            return None
+            Cached.clear(MenuController.index)
+            Cached.clear(MenuController.index_combo)
+            self.status ='Menu was saved'
+            return {'errors':[], 'status':self.status}
         else:
-            return {'MenuForm':frm}
+            return {'MenuForm':frm , 'errors':frm.errors}
 
 class CMSContentController(CMSBaseController):
     def __init__(self, *args, **kwargs):
@@ -257,7 +279,6 @@ class CMSContentController(CMSBaseController):
                                                        'Content':cmsContent.HTMLContent,
                                                        'Tags':','.join([str(x) for x in cmsContent.Tags])})
 
-
         self.extra_context['op']=key and 'update' or 'insert'
         return {'content':cmsContent, 'CMSContentForm':self.ContentForm}
 
@@ -277,6 +298,10 @@ class CMSContentController(CMSBaseController):
 
 class CMSPageController(CMSBaseController):
     def __init__(self,*args, **kwargs):
+        if(kwargs.has_key('menu')):
+            self.menu = kwargs['menu']
+        else:
+            self.menu = 'cms'
         super(CMSPageController,self).__init__(*args, **kwargs)
     @ClearDefaults()
     @Default('index')
@@ -293,10 +318,12 @@ class CMSPageController(CMSBaseController):
             self.redirect(LoginController.get_url())
     
     @View(templateName='CMSPage_index.html')
+    @Cached()
     def index(self, tag=None):
         limit = int(self.params.limit or 20)
         offset = int(self.params.offset or 0)
         if not tag:
+            contents = cms.CMSContent.all().order('-DateCreated').fetch(limit=limit, offset=offset)
             return {'links':cms.CMSLink.all().fetch(limit, offset)}
         else:
             contents=cms.CMSContent.gql("WHERE Tags =:t",t=tag).fetch(limit=limit, offset=offset)

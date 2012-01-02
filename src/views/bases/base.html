@@ -23,18 +23,18 @@ $(function(){
 		 o.next('div').toggle('fast');
 	});
 	$("a.commentLink").click(function () {
-        $("#comments").modal(
-        {
+        $("#comments").modal({
             opacity: 60,
             overlayCss: { backgroundColor: "Black" }
-        }
-        );
+        });
     });
-    $('#menu_top_menu').superfish();
+	$('#menu_pages').attr("id","sf-menu");
+	$('#sf-menu').addClass('sf-menu');
+    $('#sf-menu').superfish();
 });
 </script>
 {% endblock %}
-{%block title%}Hal Web Framework{%endblock%}
+{%block title%}Halicea.Co{%endblock%}
 {% block analitics %}
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -49,9 +49,8 @@ $(function(){
 </script>
 {%endblock%}
 {% block top_menu %}
-{%call this.plugins.Menus.view with 'top_menu' %}
+{%call this.plugins.Menus.view with "pages" "True" %}
 {% endblock %}
-
 {% block login_menu %}
 	{% include blLogin %}
 {% endblock %}

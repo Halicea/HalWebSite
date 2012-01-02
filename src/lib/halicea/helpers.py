@@ -11,15 +11,19 @@ def ClassImport(name):
     mod = __import__('.'.join(components[:-1]), fromlist=[components[-1]])
     klass = getattr(mod, components[-1])
     return klass
-    
+
 class DynamicParameters(object):
     dictObject = None
-    def __init__(self, dictObject):
+    def __init__(self, dictObject={}, default=None):
         self.dictObject = dictObject
+        self.defaultValue= default
     def __getattr__(self, name):
-        return self.dictObject[name]
+        if self.dictObject.has_key(name):
+            return self.dictObject[name]
+        else:
+            return self.default
     def __setattr__(self, name, value):
-        if(name!='dictObject'):
+        if(name!='dictObject' and name!='defaultValue'):
             self.dictObject[name] = value
         else:
             self.__dict__[name]=value

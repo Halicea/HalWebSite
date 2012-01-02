@@ -9,4 +9,4 @@ class WelcomeController(hrh):
     @Default('welcome')
     def SetOperations(self): pass
     def welcome(self):
-        return {}    
+        return {} 
