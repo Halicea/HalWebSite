@@ -75,7 +75,8 @@ class HalRequestHandler(webapp.RequestHandler ):
 #            self.params = DynamicParameters(RequestDictMixin(self.request))
         else:
             self.params = DynamicParameters(RequestDictMixin(self.request))
-        self.method = self.request.environ['METHOD']
+        self.method = self.request.environ['REQUEST_METHOD']
+        
         self.isAjax = ((request.headers.environ.get('HTTP_X_REQUESTED_WITH')=='XMLHttpRequest') or (request.headers.get('X-Requested-With')=='XMLHttpRequest'))
         if not self.isAjax: self.isAjax = self.params.isAjax=='true'
         if self.session:

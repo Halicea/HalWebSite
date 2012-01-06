@@ -3,16 +3,18 @@ from controllers.cmsControllers import CMSLinksController
 from models.BaseModels import Person
 
 class TestLinks(unittest.TestCase):
-    def setUp(self):
+    def __init__(self, *args, **kwargs):
+        super(TestLinks, self).__init__(*args, **kwargs)
         self.testbed = testbed.Testbed()
         self.testbed.activate()
         self.testbed.init_datastore_v3_stub()
         self.testbed.init_memcache_stub()
         
+    def setUp(self):
         self.request = webapp.Request({
             "wsgi.input": StringIO(),
             "CONTENT_LENGTH": 0,
-            "METHOD": "GET",
+            "REQUEST_METHOD": "GET",
             "PATH_INFO": "/",
         })
         

@@ -1,13 +1,17 @@
 from tests.testImports import *
 from controllers.cmsControllers import MenuController
 import os
+from models.cmsModels import Menu
 class MenuControllerTests(unittest.TestCase):
-    def setUp(self):
+
+    def __init__(self, *args, **kwargs):
+        super(MenuControllerTests, self).__init__(*args, **kwargs)
         self.testbed = testbed.Testbed()
         self.testbed.activate()
         self.testbed.init_datastore_v3_stub()
         self.testbed.init_memcache_stub()
         
+    def setUp(self):        
         self.menu = MenuController()
         self.req = webapp.Request({
             "wsgi.input": StringIO(),
@@ -15,17 +19,23 @@ class MenuControllerTests(unittest.TestCase):
             "SERVER_NAME":'localhost',
             "SERVER_PORT":81,
             "CONTENT_LENGTH": 0,
-            "METHOD": "POST",
+            "REQUEST_METHOD": "POST",
             "PATH_INFO": "/",
         })
         self.resp = webapp.Response()
-    
+    def tearDown(self):
+        #self.testbed.deactivate()
+        pass
+
     def test_1_save(self):
         self.menu.initialize(self.req, self.resp)
         self.menu.params = DynamicParameters({'Name':'test_menu'})
         result = self.menu.save()
-        self.assertTrue(result.has_key('errors') and len(result['errors'])>0, str(result['errors']))
-    
+        result1 = Menu.all().fetch(10)
+        self.assertEqual(len(result1), 1)
+        self.assertEqual(result1[0].Name, 'test_menu')
+        self.assertFalse(result.has_key('errors') and len(result['errors'])>0, str(result['errors']))
+
     def test_2_index(self):
         self.menu.initialize(self.req, self.resp)
         self.menu.params = DynamicParameters()

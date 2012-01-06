@@ -15,9 +15,8 @@ DEFAULT_OPERATIONS =\
         'index':{'method':dcm.index, 'view':True}, 
         'view':{'method':dcm.view, 'view':True},
         'edit':{'method':dcm.edit, 'view':True},
-        'create':{'method':dcm.edit, 'view':False},
-        'insert':{'method':dcm.save, 'view':False},
-        'update':{'method':dcm.save, 'view':False},
+        'new':{'method':dcm.edit, 'view':False},
+        'save':{'method':dcm.save, 'view':False},
         'delete':{'method':dcm.delete, 'view':False},
      }
 
@@ -29,9 +28,6 @@ PLUGINS =\
        ("AjaxForm", 'lib.halicea.plugins.AjaxForm'),
        ("Authentication", 'lib.halicea.plugins.AuthenticationMixin'),
     ]
-
-
-
 APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
 if os.name == 'nt':
     APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
@@ -40,7 +36,8 @@ if os.name == 'nt':
 #we define the path relatively to our settings file
 PROJ_LOC = os.path.dirname(os.path.dirname(__file__))
 
-#MVC Directories
+#MVC Directories  
+#!--DO NOT CHANGE THIS UNLESS YOU KNOW WHAT YOU ARE DOING--!
 MODELS_DIR = join(PROJ_LOC,'models')
 VIEWS_DIR = join(PROJ_LOC,'views')
 VIEWS_RELATIVE_DIR = 'views'
@@ -56,6 +53,10 @@ IMAGES_DIR = join(STATIC_DATA_DIR, 'images')
 STYLES_DIR = join(STATIC_DATA_DIR, 'styles')
 HANDLER_MAP_FILE = join(PROJ_LOC, 'handlerMap.py')
 TESTS_DIR = join(PROJ_LOC, 'tests')
+DOCS_DIR = join(PROJ_LOC, 'docs')
+APPS_DIR = join(PROJ_LOC, 'apps')
+LIB_DIR = join(PROJ_LOC, 'lib')
+REPOS_DIR = join(PROJ_LOC, 'repositories')
 #End MVC Directories
 
 #MVC Sufixes

@@ -142,7 +142,6 @@ class MenuController(CMSBaseController):
             base = ""
         return link%{'base':base, 'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':rest and '<ul>'+rest+'</ul>' or ''}
 
-    @Cached()
     def index(self,*args):
         return {'menus':cms.Menu.all().fetch(100)}
     
@@ -154,6 +153,9 @@ class MenuController(CMSBaseController):
 #    @ClearCacheAfter('controllers.cmsControllers.MenuController.index')
 #    @ClearCacheAfter('controllers.cmsControllers.MenuController.index_combo')
 #    @ClearCacheAfter('controllers.cmsControllers.MenuController.view', lambda r, name:name)
+    
+    @ClearCacheAfter(CMSLinksController.index)
+    @ClearCacheAfter(CMSLinksController.index_combo)
     def delete(self, name):
         menu = cms.Menu.get_by_key_name(name)
         menu.delete()
