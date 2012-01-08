@@ -1,2 +1,4 @@
-templates=${halweb}/Templates
-project=src
+templates: '${halweb}/Templates'
+path: 'src'
+
+  

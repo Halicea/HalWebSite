@@ -1,0 +1,9 @@
+halicea:
+  path: 'C:/MyProjects/repositories/halicea'
+  readonly: False
+base:
+  path: 'C:/MyProjects/repositories/base'
+  readonly: False
+cms:
+  path: 'C:/MyProjects/repositories/cms'
+  readonly: False

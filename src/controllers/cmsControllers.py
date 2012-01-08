@@ -27,8 +27,8 @@ class CMSLinksController(CMSBaseController):
     @Handler('save')
     @Handler('delete')
     def SetOperations(self):pass
+
     @AdminOnly()
-    
     @View(templateName='CMSLinks.html')
     def index(self, menu='cms', *args):
         result ={'CMSContentForm': CMSContentForm(), 'MenuForm':CMSMenuForm(), };
@@ -93,10 +93,10 @@ class CMSLinksController(CMSBaseController):
             self.status="Link is invalid";
         return self.isAjax and self.status or self.redirect(self.get_url())
 class MenuController(CMSBaseController):
-    
     def __init__(self, *args, **kwargs):
         super(MenuController, self).__init__(*args, **kwargs)
         self.base = '/cms/'
+        
     @ClearDefaults()
     @Default('view')
     @Handler('edit')
@@ -142,6 +142,7 @@ class MenuController(CMSBaseController):
             base = ""
         return link%{'base':base, 'url':node.Url(), 'key':str(node.key()), 'name':node.Name, 'rest':rest and '<ul>'+rest+'</ul>' or ''}
 
+
     def index(self,*args):
         return {'menus':cms.Menu.all().fetch(100)}
     
@@ -154,8 +155,8 @@ class MenuController(CMSBaseController):
 #    @ClearCacheAfter('controllers.cmsControllers.MenuController.index_combo')
 #    @ClearCacheAfter('controllers.cmsControllers.MenuController.view', lambda r, name:name)
     
-    @ClearCacheAfter(CMSLinksController.index)
-    @ClearCacheAfter(CMSLinksController.index_combo)
+    #@ClearCacheAfter(CMSLinksController.index)
+    #@ClearCacheAfter(CMSLinksController.index_combo)
     def delete(self, name):
         menu = cms.Menu.get_by_key_name(name)
         menu.delete()

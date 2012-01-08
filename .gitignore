@@ -4,6 +4,7 @@
 .pydevproject
 .settings
 *.pyc
+build
 #database files for appengine
 db.rdbms
 db

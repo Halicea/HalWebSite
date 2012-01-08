@@ -3,14 +3,16 @@ from controllers.cmsControllers import MenuController
 import os
 from models.cmsModels import Menu
 class MenuControllerTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.testbed = testbed.Testbed()
+        cls.testbed.activate()
+        cls.testbed.init_datastore_v3_stub()
+        cls.testbed.init_memcache_stub()
+    @classmethod
+    def tearDownClass(cls):
+        cls.testbed.deactivate()
 
-    def __init__(self, *args, **kwargs):
-        super(MenuControllerTests, self).__init__(*args, **kwargs)
-        self.testbed = testbed.Testbed()
-        self.testbed.activate()
-        self.testbed.init_datastore_v3_stub()
-        self.testbed.init_memcache_stub()
-        
     def setUp(self):        
         self.menu = MenuController()
         self.req = webapp.Request({
@@ -23,9 +25,6 @@ class MenuControllerTests(unittest.TestCase):
             "PATH_INFO": "/",
         })
         self.resp = webapp.Response()
-    def tearDown(self):
-        #self.testbed.deactivate()
-        pass
 
     def test_1_save(self):
         self.menu.initialize(self.req, self.resp)
@@ -43,7 +42,7 @@ class MenuControllerTests(unittest.TestCase):
         self.assertEqual(1, len(result['menus']), "One menu should exist in the datastore")
         if(len(result["menus"])<1):
             self.assertEqual("test_menu", result['menus'][0], "test_menu should be the only result in the menu list")
-    
+
     def test_3_index_combo(self):
         self.menu.initialize(self.req, self.resp)
         self.menu.params = DynamicParameters()
