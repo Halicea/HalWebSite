@@ -1,7 +1,6 @@
 from tests.testImports import *
 from controllers.cmsControllers import CMSLinksController
 from models.BaseModels import Person
-from test.test_pyclbr import ClassMethodType
 
 class TestLinks(unittest.TestCase):
 

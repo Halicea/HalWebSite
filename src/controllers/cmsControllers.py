@@ -7,11 +7,10 @@ from forms.cmsForms import CMSContentForm, CMSMenuForm
 from google.appengine.ext import db
 from lib import messages
 from django.utils import simplejson
-from models import cmsModels
 
 contentTypeViews={
-                  cmsModels.ContentType.CMSPage:'CMSPage.html',
-                  cmsModels.ContentType.CMSPage:'CMSPost.html',
+                  cms.ContentType.CMSPage:'CMSPage.html',
+                  cms.ContentType.CMSPage:'CMSPost.html',
                  }
 
 class CMSBaseController(hrh):
@@ -85,7 +84,7 @@ class CMSLinksController(CMSBaseController):
                 lnk.Content.delete()
             menus = lnk.linkroot_menus.fetch(10)
             if menus:
-                for menu in menus: CachedResource.clear(MenuController.view, menu.Name)
+                for menu in menus: Cached.clear(MenuController.view, menu.Name)
                 db.delete(menus)
             lnk.delete()
             self.status='Link is deleted'
@@ -196,8 +195,8 @@ class CMSContentController(CMSBaseController):
     def __init__(self, *args, **kwargs):
         super(CMSContentController, self).__init__(*args, **kwargs)
         self.ContentForm = CMSContentForm()
-    @Handler(operation='view', method='view')
     @Handler('my_contents')
+    @Handler('posts')
     def SetOperations(self):pass
 
     def view(self, key, *args):
@@ -205,6 +204,11 @@ class CMSContentController(CMSBaseController):
         if cnt: return {'content':cnt}
         self.status = "Content Not Found"
         self.redirect('/cms/contents')
+
+    def posts(self):
+        posts = cms.CMSContent.all().filter('ContentTypeNumber =', cms.ContentType.Post).order('-DateCreated')
+        posts= posts.fetch(self.params.limit or 20, self.params.offset or 0)
+        return locals()
 
     @View(templateName = 'CMSContent.html')
     def index(self, *args):

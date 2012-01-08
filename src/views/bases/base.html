@@ -3,7 +3,7 @@
 {{block.super}}
 <link href="/styles/ui-silver/jquery-ui-1.7.2.custom.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="/styles/Style.css" rel="stylesheet" type="text/css" />
-<link href="/styles/superfish.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="/styles/mega-menu/skins/blue.css" rel="stylesheet" type="text/css" />
 {% endblock %}
 
 {% block scripts %}
@@ -12,8 +12,8 @@
 <script type="text/javascript" src="/jscripts/jquery-ui-1.7.2.custom.min.js"></script>
 <script type="text/javascript" src="/jscripts/jquery.layout.js"></script>
 <script type="text/javascript" src="/jscripts/jquery.form.js"></script>
-<script type="text/javascript" src="/jscripts/hoverIntent.js" ></script>
-<script type="text/javascript" src="/jscripts/superfish.js" ></script>
+<script type="text/javascript" src="/jscripts/jquery.hoverIntent.minified.js"></script>
+<script type="text/javascript" src="/jscripts/jquery.dcmegamenu.1.3.3.min.js"></script>
 <script type="text/javascript">
 $(function(){
     $('input[name*="Date"]').datepicker();
@@ -28,9 +28,15 @@ $(function(){
             overlayCss: { backgroundColor: "Black" }
         });
     });
-	$('#menu_pages').attr("id","sf-menu");
-	$('#sf-menu').addClass('sf-menu');
-    $('#sf-menu').superfish();
+	$('#menu').addClass('blue');
+	$('#menu_pages').attr("id","mega-menu");
+	$('#mega-menu').addClass('mega-menu');
+	$('#mega-menu').dcMegaMenu({
+		rowItems: '1',
+		speed: 'fast',
+		effect: 'fade',
+		event: 'click' 
+	});
 });
 </script>
 {% endblock %}

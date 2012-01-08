@@ -27,12 +27,14 @@ webapphandlers = [
 #for diplaying contents created by a user.
 ('/cms/contents', cmsControllers.CMSContentController.new_factory(op='my_contents')),
 #for diplaying specifyc content by it's key
-('/cms/content/(.*)', cmsControllers.CMSContentController),
+('/cms/content/(.*)', cmsControllers.CMSContentController.new_factory(op='view')),
+('/cms/content', cmsControllers.CMSContentController),
 #links page
 ('/cms/links', cmsControllers.CMSLinksController),
 #display pages by tag
 ('/cms/tag/(.*)', cmsControllers.CMSPageController.new_factory(op='index')),
 #display a link
+('/cms/posts', cmsControllers.CMSPageController.new_factory(op='posts')),
 ('/cms/(.*)', cmsControllers.CMSPageController.new_factory(op='view')),
 #display latest pages
 ('/', cmsControllers.CMSPageController.new_factory(op='index', menu='pages')),
