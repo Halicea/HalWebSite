@@ -7,11 +7,9 @@ from controllers import cmsControllers
 webapphandlers = [
 #{%block ApplicationControllers %}
 #{%block BaseControllers %}
-('/Login', BaseControllers.LoginController),
-('/Login/(.*)', BaseControllers.LoginController),
-('/Logout',BaseControllers.LogoutController),
-('/AddUser', BaseControllers.AddUserController),
-('/WishList', BaseControllers.WishListController),
+('/login', BaseControllers.LoginController),
+('/logout',BaseControllers.LoginController.new_factory(op='logout')),
+('/register', BaseControllers.LoginController.new_factory(op='register_view')),
 ('/admin/Role', BaseControllers.RoleController),
 ('/admin/RoleAssociation', BaseControllers.RoleAssociationController),
 ('/Base/WishList', BaseControllers.WishListController),

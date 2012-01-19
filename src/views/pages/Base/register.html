@@ -1,0 +1,26 @@
+{% extends base %}
+{% block title %}Enter Personal Data( Register) {% endblock %}
+{% block content %}
+		<div class="postHeader"><h1>{%if current_user%}Add User{%else%}Register{%endif%}</h1></div>
+        <div class="postContent">
+            <form action="" method="post">
+                <table style="text-align: right;">
+                	{%autoescape off%}
+                		{%for field in register%}
+                		<tr>
+	                        <td>{{field.label}}:</td>
+	                        <td>{{field}}</td>
+	                        <td>{%if field.errors%}<label style="color: red;">*</label>{%endif%}</td>
+                    	</tr>
+                		{%endfor%}
+                	{%endautoescape%}
+                	<tr>
+                		<td></td>
+                		<td>
+                			<input type="submit" value="Save" style="width:100%;"/>
+                		</td>
+                	</tr>
+                </table>
+            </form>
+        </div>
+{%endblock%}

@@ -140,7 +140,7 @@ class ResponseHeaders(object):
         return new_f
 
 class LogInRequired(object):
-    def __init__(self, redirect_url='/Login', message= messages.must_be_loged):
+    def __init__(self, redirect_url='/login', message= messages.must_be_loged):
         self.redirect_url = redirect_url
         self.message = message
         self.handler = None
@@ -156,7 +156,7 @@ class LogInRequired(object):
         return new_f
 
 class AdminOnly(object):
-    def __init__(self, redirect_url='/Login', message= messages.must_be_admin):
+    def __init__(self, redirect_url='/login', message= messages.must_be_admin):
         self.redirect_url = redirect_url
         self.message = message
         self.handler = None
@@ -171,7 +171,7 @@ class AdminOnly(object):
         CopyDecoratorProperties(f, new_f)
         return new_f
 class InRole(object):
-    def __init__(self, role='Admin',redirect_url='/Login', message= messages.must_be_in_role):
+    def __init__(self, role='Admin',redirect_url='/login', message= messages.must_be_in_role):
         self.redirect_url = redirect_url
         self.message = message
         self.handler = None
@@ -200,12 +200,12 @@ class ErrorSafe(object):
             try:
                 return f(request, *args, **kwargs)
             except self.Exception, ex:
-                if request.response.headers['Content-Type']== ct.JSON:
+                if request.ResponseType == ct.JSON:
                     if self.showStackTrace:
                         return '''{message:"%s", stackTrace:"%s"}'''%(str(ex)+'\n'+traceback.format_exc())
                     else:
                         return '''{message:%s}'''%(self.message)
-                elif request.response.headers['Content-Type']== ct.XML:
+                elif request.ResponseType == ct.XML:
                     if self.showStackTrace:
                         return '''<root><message>%s</message><stackTrace>%s</stackTrace></root>"'''%(str(ex)+'\n'+traceback.format_exc())
                     else:
@@ -269,7 +269,7 @@ class Cached(object):
     def __call__(self, f):
         
         def new_f(request, *args, **kwargs):
-            if not DEBUG and (not not self.condition or self.condition(request, *args, **kwargs)):
+            if not DEBUG and (not self.condition or self.condition(request, *args, **kwargs)):
                 resName = Cached.resName(f, request.__class__,*args, **kwargs)
                 res = cache.get(resName)
                 if not res:
@@ -322,7 +322,8 @@ class ClearCacheFirst(object):
             return f(request, *args, **kwargs)
         CopyDecoratorProperties(f, new_f)
         return new_f    
-class RespondWith():
+    
+class ResponseType():
     def __init__(self, contentType):
         if isinstance(contentType, str):
             self.respond = lambda request, *args, **kwargs: contentType

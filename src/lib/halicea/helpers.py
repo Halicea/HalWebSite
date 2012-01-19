@@ -1,4 +1,14 @@
 from UserDict import DictMixin
+ContentTypes={
+               'json':'application/json',
+               'xml':'application/xml',
+               'html':'text/html',
+               'text':'text/plain',
+               'png':'image/png',
+               'jpg':'image/jpg',
+               'gif':'image/gif',
+             }
+ContentTypes_reverse=dict([(ContentTypes[x], x) for x in ContentTypes.keys()])
 
 class NotSuportedException(Exception):
     def __init__(self, message):
@@ -51,8 +61,15 @@ class LazyDict(DictMixin):
         self.init_method = ''
         self.args = args
         self.kwargs = kwargs
+        if isinstance(types, tuple) or isinstance(types, list):
+            types = dict(types)
         for k in types:
-            self.objects[k[0]] = [ClassImport(k[1]), None]
+            if isinstance(types[k], type):
+                self.objects[k] = [types[k], None]
+            elif isinstance(types[k], str):
+                self.objects[k] = [ClassImport(types[k]), None]
+            else:
+                raise NotSuportedException('only string and type types are supported as items in the Lazy Dict\n Instead %s given'%str(k[1]))
     def __getitem__(self, key):
         if not self.objects[key]:
             raise Exception("Invalid Property "+key)

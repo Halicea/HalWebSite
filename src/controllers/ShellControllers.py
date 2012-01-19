@@ -22,7 +22,7 @@ INITIAL_UNPICKLABLES = [
 class StatementController(hrh):
     """Evaluates a python statement in a given session and returns the result.
     """
-    @AdminOnly()
+    #@AdminOnly()
     def get(self):
         self.response.headers['Content-Type'] = 'text/plain'
         # extract the statement to be run
@@ -122,7 +122,7 @@ class StatementController(hrh):
 class FrontPageController(hrh):
     """Creates a new session and renders the shell.html template.
     """
-    @AdminOnly()
+    #@AdminOnly()
     def get(self):
         # set up the session. TODO: garbage collect old shell sessions
         session_key = self.request.get('session')

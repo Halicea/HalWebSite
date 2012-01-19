@@ -1,8 +1,7 @@
 from google.appengine.api import urlfetch
 from django.utils import simplejson
 import urllib, os
-from forms.BaseForms import InvitationForm
-from lib.halicea import ContentTypes as ct
+from forms.BaseForms import InvitationForm, RegisterForm
 #{%block imports%}
 from lib.halicea.HalRequestHandler import HalRequestHandler as hrh
 from lib.halicea.decorators import *
@@ -16,13 +15,14 @@ from forms.BaseForms import LoginForm
 
 class LoginController( hrh ):
     @Default('login')
+    @Handler('logout')
     @Handler('JanrainAuth','JanrainAuth')
+    @Handler('register')
     def SetOperations(self):pass
 
     @View(templateName='Login.html')
-    @ErrorSafe()
     def login(self, *args):
-        if self.request.method=='GET':
+        if self.method=='GET':
             return self.login_get(*args)
         else:
             return self.login_post(*args)
@@ -68,7 +68,7 @@ class LoginController( hrh ):
                     person.PhotoUrl=photo,
                     person.put()
                 else:
-                    person = Person.CreateNew2(uname=json['profile']['preferredUsername'],
+                    person = Person.CreateNew(uname=json['profile']['preferredUsername'],
                                               name=name,
                                               surname=surname,
                                               email = email,
@@ -79,7 +79,7 @@ class LoginController( hrh ):
                                               photoUrl=photo,
                                               _autoSave=True)
                     
-            self.login_user2(person)
+            self.login_user(person)
             self.status = 'Welcome '+person.UserName
             if self.params.redirect_url:
                 self.redirect(self.params.redirect_url)
@@ -90,16 +90,20 @@ class LoginController( hrh ):
             self.respond()
 
     def login_post(self , *args):
-        lform  = LoginForm(data = self.request.params)
-        if lform.is_valid():
-            if(self.login_user_local(lform.cleaned_data['Email'], lform.cleaned_data['Password'])):
-                if lform.cleaned_data['RedirectUrl']:
-                    self.redirect( lform.cleaned_data['RedirectUrl'])
+        lform  = LoginForm(formdata = self.request.params)
+        if lform.validate():
+            if(self.login_user_local(lform.data['Email'], lform.data['Password'])):
+                if lform.data['RedirectUrl']:
+                    self.redirect( lform.data['RedirectUrl'])
                 else:
                     self.redirect( '/' )
                 return
-        self.status = 'Email Or Password are not correct!'
-        return {'LoginForm':lform}
+            else:
+                self.status = "Username or Password are Not Correct"
+                lform['Password']=""
+                return {'LoginForm':lform}
+        else:
+            return {'LoginForm':lform}
 
     def login_get( self, *args ):
         if not self.User:
@@ -110,44 +114,33 @@ class LoginController( hrh ):
         else:
             self.redirect( '/' )
 
-class LogoutController( hrh ):
-    @LogInRequired(message = '')
-    def get( self, *args ):
+    def logout(self):
         self.logout_user()
         self.redirect( LoginController.get_url() )
+    
+    def register_view(self, form=None):
+        return {'register':form or RegisterForm()}
 
-class AddUserController( hrh ):
-    def get( self ):
-        self.respond()
-        
-    def post( self ):
-        self.SetTemplate(templateName='Thanks.html')
-        try:
-            user = Person( 
-                           UserName = self.g('UserName'),
-                           Email=self.g( 'Email' ),
-                           Name=self.g( 'Name' ),
-                           Surname=self.g( 'Surname' ),
-                           Password=self.g( 'Password' ),
-                           Public=self.g( 'Public' ) == 'on' and True or False,
-                           Notify=self.g( 'Notify' ) == 'on' and  True or False
-                           )
-
-            if ( self.request.get( 'Notify' ) == None and self.request.get( 'Notify' ) == 'on' ):
-                user.Notify = True
-            else:
-                user.Notify = False
-
-            if ( self.request.get( 'Public' ) == None and self.request.get( 'Public' ) == 'on' ):
-                user.Public = True
-            else:
-                user.Public = False
-            user.put()
-            self.respond( locals() )
-        except Exception, ex:
-            self.status = ex
-            self.redirect(AddUserController.get_url())
-
+    def register(self):
+        reg = RegisterForm()
+        if self.method == 'POST':
+            self.SetTemplate(templateName='thanks.html')
+            reg = RegisterForm(self.request.POST)
+            if reg.validate():                
+                user = Person.CreateNew(
+                                reg.data['UserName'], 
+                                reg.data['Name'], 
+                                reg.data['Surname'], 
+                                reg.data['Email'],                                     
+                                reg.data['Password'],
+                                reg.data['Public'],
+                                reg.data['Notify'],
+                                'local', 
+                                None, 
+                                _autoSave=True)
+                return {'uname':' '.join([user.Name, user.Surname])}  
+        self.SetTemplate(templateName='register.html')
+        return {'register':reg}
 
 class RoleController(hrh):
     def edit(self):
@@ -320,18 +313,19 @@ class InvitationController(hrh):
     @Handler('delete', 'delete')
     def SetOperations(self):pass
 
-    @ResponseHeaders(**{'Content-Type':ct.JSON})
     @Post()
     @ErrorSafe()
+    @ResponseType('json')
     def create(self,*args):
         form = InvitationForm(data=self.request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             from google.appengine.api import mail
-            p=Person.CreateNew2(uname=email, email=email,
+            p=Person.CreateNew(uname=email, email=email,
                              name=email,surname=email,
                              password='blablabla', _autoSave=True)
-            inv =Invitation.CreateNew2(invitefrom=self.User, personbinding=p, _isAutoInsert=True)
+            
+            inv =Invitation.CreateNew(invitefrom=self.User, personbinding=p, _isAutoInsert=True)
             mail.send_mail(sender='admin@halicea.com',to=p.Email,subject='Invitation for Bordj',
                            body="""Dear Mr/Ms,<br/>
     You have been invited to register on Bordj app from {%s}.<br/>
@@ -354,12 +348,8 @@ class InvitationController(hrh):
         result = {'InvitationList': Invitation.all().filter('Accepted = ', accepted).fetch(limit=count, offset=index)}
         result.update(locals())
         return result
+    @ResponseType('json')
     def delete(self, *args):
         Invitation.get(self.params.key).delete()
-        if self.isAjax:
-            self.response.headers["Content-Type"]=ct.JSON
-            return """{message:"Item is deleted"}"""
-        else:
-            from BordjControllers import DolgController
-            self.redirect(DolgController.get_url())
+        return {'message':'Item is deleted'}
 

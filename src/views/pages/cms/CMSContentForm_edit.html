@@ -3,6 +3,7 @@
 
 <div class="post">
     <div class="postContent">
+        {%call this.Html.AjaxForm.beginForm with name="saveContent" action="/cms/contents" method="post" %}        
         <form action="/cms/contents" method="post" id="saveContent">
             <input type="hidden" name="op" value="save" />
             <input type="hidden" name="key" value="{{content.key}}" />
@@ -10,7 +11,7 @@
                 <tr>
                     <td>{{CMSContentForm.Title.label}} </td>
                     <td>
-		            {{CMSContentForm.Title}}
+                    {{CMSContentForm.Title}}
                     </td>
                     <td>{{CMSContentForm.Title.errors}}</td>
                 </tr>
@@ -19,8 +20,8 @@
                         Content
                     </td>
                     <td>
-	                     <textarea id="id_Content" name="Content" style="width:500px; height:300px;">
-	                     </textarea>
+                         <textarea id="id_Content" name="Content" style="width:500px; height:300px;">
+                         </textarea>
                      </td>
                      <td>
                         <label style="color: red">{{CMSContentForm.Content.errors}}</label>
@@ -34,13 +35,14 @@
                     <td/>
                     <td>
                     <input type="submit" value="Save" style="width:100%;padding:10px;"></input>
-		            {%if content.key%}
-		            <input type="button" class="deleteContent" key="{{content.key}}" value="Delete"></input>
-		            {%endif%}
+                    {%if content.key%}
+                    <input type="button" class="deleteContent" key="{{content.key}}" value="Delete"></input>
+                    {%endif%}
                     </td>
                 </tr>
             </table>
-        </form>
+         </form>
+        {%call this.Html.AjaxForm.endForm %}
     </div>
 </div>
 <script type="text/javascript">

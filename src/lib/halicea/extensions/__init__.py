@@ -1,24 +1,24 @@
 from lib.gaesessions import get_current_session
 from models.BaseModels import Person
-from lib.halicea.helpers import DynamicParameters
-
+from lib.halicea.helpers import DynamicParameters, LazyDict
 class AuthenticationMixin(object):
-    
-    def __init__(self, *args, **kwargs):
-        pass
+    Impersonated=None
     def __getSession__(self):
         return get_current_session()
+    
     session = property(__getSession__)
     def GetUser(self):
         if self.session and self.session.is_active():
             return self.session.get('user', default=None)
         else:
             return None
-
     @property
     def User(self):
-        return self.GetUser()
-    
+        if self.Impersonated:
+            return self.Impersonated
+        else:
+            return self.GetUser()
+
     def login_user_local(self, uname, passwd):
         self.logout_user()
         user = Person.GetUser(uname, passwd, 'local')
@@ -37,33 +37,30 @@ class AuthenticationMixin(object):
             self.session.terminate()
         return True
 
-class HtmlHelpersMixin(object):
-    def __init__(self, *args, **kwargs):
-        pass
-    
-    class AjaxForm(object):
-        __isAjax = False
-        def initialize(self, request, response):
-            pass
-            
-        def beginForm(self, action,name, method, successCallback="", failCallback=""):
-            result = """
-            <form id='%(name)s' action='%(action)s' method='%(method)s'>
-            return result%"""
-            pass
-        def endForm(self, name):
-            result="""</form>
-            <script type='text/javascript'>
-                %(jqstart)s
-                    $('#%(name)s').ajaxForm({
-                     success:%(success)s,
-                     error:%(error)s
-                    });
-                %(jqend)s
-            </script>
-            """
-    Html = DynamicParameters({
-             'AjaxForm':HtmlHelpersMixin.AjaxForm,
-           })
 
-        
+class AjaxForm(object):
+    __isAjax = False
+    def initialize(self, *args, **kwargs):
+        pass
+    def beginForm(self, name="", action="",  method="", successCallback="", failCallback=""):
+        result = """<script type='text/javascript'>
+    $(function(){
+        $('#%(name)s').ajaxForm({
+         success:%(success)s,
+         error:%(error)s
+        });
+    });
+</script>
+<form id='%(name)s' action='%(action)s' method='%(method)s'>
+return result%"""
+        return result
+
+    def endForm(self, name):
+        result="""</form>
+        """
+
+class HtmlMixin(object):
+    def __init__(self, *args, **kwargs):
+        self.Html = DynamicParameters(LazyDict({
+                              'AjaxForm':AjaxForm,
+                              }, 'initialize'))

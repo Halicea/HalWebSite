@@ -1,26 +1,26 @@
-#from django.forms import widgets, fields, extras
-from lib.djangoFormImports import widgets, fields, extras
-from django.forms import Form, BaseForm
-from google.appengine.ext.db.djangoforms import ModelForm
+from lib.wtforms import * 
+from lib.wtforms.ext.appengine.db import model_form
+#{%block imports%}
 from models.BaseModels import *
+#{%endblock%}
 
-class PersonForm(ModelForm):
-    class Meta():
-        model = Person
-class LoginForm(Form):
-    RedirectUrl = fields.CharField(widget=widgets.HiddenInput, required=False)
-    Email = fields.CharField(required=True)
-    Password = fields.Field(required=True, widget=widgets.PasswordInput)
-class RoleForm(ModelForm):
-    class Meta():
-        model=Role
-class RoleAssociationForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(RoleAssociationForm, self).__init__(*args, **kwargs)
-        self.fields['Person'].queryset = Person.all().fetch(limit=100)
-    class Meta():
-        model=RoleAssociation
-##End Invitation
-from django.forms import Form
+PersonForm = model_form(Person) 
+RoleForm = model_form(Role)
+class LoginForm(form.Form):
+    RedirectUrl = fields.HiddenField()
+    Email = fields.TextField(validators=[validators.required(), validators.length(5, 30)])
+    Password = fields.PasswordField(validators=[validators.required()])
+
+
+class RegisterForm(form.Form):
+    UserName = fields.TextField(validators=[validators.required(),validators.length(5, 30)]) 
+    Name = fields.TextField(validators=[validators.required(),validators.length(2, 30)]) 
+    Surname=fields.TextField(validators=[validators.required(),validators.length(2, 30)]) 
+    Email = fields.TextField(validators=[validators.required(),validators.email()]) 
+    Password = fields.PasswordField(validators=[validators.required(),validators.length(5, 30)]) 
+    Public=fields.BooleanField(default=True) 
+    Notify = fields.BooleanField(default=True)
+    
+
 class InvitationForm(Form):
-    Email = fields.EmailField(required=True)
+    Email = fields.TextField(validators=[validators.email(), validators.required()])

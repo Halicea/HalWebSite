@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-
 import os
 from os.path import join
-#from lib.halicea import deCMSPageControllerfaultControllerMethods as dcm
-RUN = 'appengine'
-DEBUG = True
-TEMPLATE_DEBUG = True
+PLATFORM = 'appengine'
+DEBUG = False
+TEMPLATE_DEBUG = False
 DEFAULT_CHARSET ='UTF-8'
 
 from lib.halicea import dummyControllerMethods as dcm
@@ -25,9 +23,14 @@ PLUGINS =\
        ("Links", 'controllers.cmsControllers.CMSLinksController'),
        ("Contents", 'controllers.cmsControllers.CMSContentController'),
        ("Menus", 'controllers.cmsControllers.MenuController'),
-       ("AjaxForm", 'lib.halicea.plugins.AjaxForm'),
-       ("Authentication", 'lib.halicea.plugins.AuthenticationMixin'),
     ]
+
+EXTENSIONS =\
+   [
+        'lib.halicea.extensions.AuthenticationMixin',
+        'lib.halicea.extensions.HtmlMixin'
+   ]
+
 APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
 if os.name == 'nt':
     APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
@@ -86,7 +89,7 @@ ROOT_URLCONF ='handlerMap'
 TEMPLATE_LOADERS = ('lib.halicea.HalTemplateLoader.HalLoader','django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader')
 
 #PASTE YOUR CONFIGURATION HERE
-USE_I18N = True
+USE_I18N = False
 #LANGUAGES = (
 #    # 'en', 'zh_TW' match the directories in conf/locale/*
 #    ('en', _('English')),

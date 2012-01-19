@@ -1,22 +1,13 @@
-__author__ = 'KMihajlov'
+from lib.wtforms import *
 #{%block imports%}
-from google.appengine.ext.db.djangoforms import ModelForm
-from django.forms import Form, BaseForm, fields, widgets
-from django.forms.extras import widgets as extras
 from models.cmsModels import *
 #{%endblock%}
 
-class CMSContentForm(Form):
-    def __init__(self, *args, **kwargs):
-        super(CMSContentForm, self).__init__(*args, **kwargs)
-    Title = fields.CharField(required=True, widget=widgets.TextInput(attrs={'style':'width:500px;'}))
-    Content = fields.CharField(widget=widgets.Textarea(), required=True)
-    Tags = fields.CharField(required=False, widget=widgets.TextInput(attrs={'style':'width:500px;'}))
-##End Comment
+class CMSContentForm(form.Form):
+    Title = fields.TextField(validators = [validators.required("Title is Required"),])
+    Content = fields.TextField(validators = [validators.required("Title is Required"),])
+    Tags = fields.TextField()
 
-class CMSMenuForm(Form):
-    def __init__(self, *args, **kwargs):
-        super(CMSMenuForm, self).__init__(*args, **kwargs)
-    key = fields.Field(widget=widgets.HiddenInput, required=False)
-    Name = fields.CharField(required=True, min_length=3)
-    
+class CMSMenuForm(form.Form):
+    key = fields.HiddenField()
+    Name = fields.TextField(validators=[validators.required(), validators.length(3, -1)])

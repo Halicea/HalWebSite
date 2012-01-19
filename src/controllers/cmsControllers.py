@@ -171,13 +171,12 @@ class MenuController(CMSBaseController):
         return {'MenuForm':frm}
     
     @Post()
-    @View(templateName='Menu_edit.html')
-    @RespondWith('json')
+    @ResponseType('json')
     @ClearCacheAfter(CMSLinksController.index)
     def save(self, *args):
-        frm = CMSMenuForm(self.params)
-        if frm.is_valid():
-            data = frm.clean()
+        frm = CMSMenuForm(formdata=self.params)
+        if frm.validate():
+            data = frm.data
             menu = cms.Menu.CreateNew(name=data["Name"], locationId="none", cssClass=None, creator=self.User, _isAutoInsert= True)
             if data['key']:
                 menu = cms.Menu.get(data['key'])
@@ -245,9 +244,9 @@ class CMSContentController(CMSBaseController):
     @AdminOnly()
     @Post()
     def save(self, *args):
-        form = CMSContentForm(data=self.params)
-        if form.is_valid():
-            data =form.clean()
+        form = CMSContentForm(formdata=self.params)
+        if form.validate():
+            data =form.data
             tags = []
             try:
                 tags = [x.strip() for x in data['Tags'].split(',')]
@@ -282,7 +281,7 @@ class CMSContentController(CMSBaseController):
         cmsContent =None
         if key:
             cmsContent = cms.CMSContent.get(key)
-            self.ContentForm = CMSContentForm(initial={'Title':cmsContent.Title,
+            self.ContentForm = CMSContentForm(formdata={'Title':cmsContent.Title,
                                                        'Content':cmsContent.HTMLContent,
                                                        'Tags':','.join([str(x) for x in cmsContent.Tags])})
 

@@ -1,7 +1,7 @@
-from conf.settings import RUN
+from conf.settings import PLATFORM
 
 #Choose which cache to proxy 
-if RUN =='appengine':
+if PLATFORM =='appengine':
     from google.appengine.api import memcache
 else:
     from memcache import Client

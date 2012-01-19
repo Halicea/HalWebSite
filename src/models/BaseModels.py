@@ -3,6 +3,7 @@ from google.appengine.ext.db.djangoforms import ModelForm
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
 import datetime as dt
+import sha
 ###########
 
 class Person(polymodel.PolyModel):
@@ -44,7 +45,7 @@ class Person(polymodel.PolyModel):
                     Email=email,
                     Name=name,
                     Surname=surname,
-                    Password=password,
+                    Password=sha.new(password).hexdigest(),
                     Public=public,
                     Notify=notify,
                     PhotoUrl=photoUrl
@@ -58,9 +59,9 @@ class Person(polymodel.PolyModel):
     def GetUser(cls, uname, password, authType):
         u = None
         if '@' in uname:
-            u = cls.gql('WHERE Password= :passwd AND Email= :uname AND AuthenticationType= :auth', uname=uname, passwd=password, auth=authType).get()
+            u = cls.gql('WHERE Password= :passwd AND Email= :uname AND AuthenticationType= :auth', uname=uname, passwd=sha.new(password).hexdigest(), auth=authType).get()
         else:
-            u = cls.gql('WHERE Password= :passwd AND UserName= :uname AND AuthenticationType= :auth', uname=uname, passwd=password, auth=authType).get()
+            u = cls.gql('WHERE Password= :passwd AND UserName= :uname AND AuthenticationType= :auth', uname=uname, passwd=sha.new(password).hexdigest(), auth=authType).get()
         return u
     def __str__(self):
         return self.Name+' '+self.Surname
