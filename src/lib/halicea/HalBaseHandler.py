@@ -2,17 +2,20 @@ from os import path
 import os
 import lib.paths as paths
 import conf.settings as settings
+from conf.imports import template
+
 from lib.halicea.Magic import MagicSet
 from lib.halicea import  mobile_agents
 from lib.halicea.helpers import DynamicParameters, LazyDict, ContentTypes
 from lib.halicea.helpers import ClassImport
-from imports import template
+
 import simplejson
 templateGroups = {'form':settings.FORM_VIEWS_DIR,
                   'page':settings.PAGE_VIEWS_DIR,
                   'block':settings.BLOCK_VIEWS_DIR,
                   'base':settings.BASE_VIEWS_DIR,}
 class HalBaseHandler(object):
+    
     def __init__(self, *args, **kwargs):
         self.params = None
         self.operations = {}
@@ -32,13 +35,15 @@ class HalBaseHandler(object):
         self.__templateIsSet__= False
         self.__template__ =""
         self.extra_context ={}
+    
     def initialize( self, request, response):
-            self.setup(request, response)
-            #set the default operations
-            self.SetDefaultOperations()
-            self.SetOperations()
-            self.SetDefaultPlugins()
-            self.SetPlugins()
+        self.setup(request, response)
+        #set the operations
+        self.SetDefaultOperations()
+        self.SetOperations()
+        #set the plugins
+        self.SetDefaultPlugins()
+        self.SetPlugins()
                 
     @classmethod
     def new_factory(cls, *args, **kwargs):
@@ -207,29 +212,23 @@ class HalBaseHandler(object):
         return self.__route__('POST', *args)
     def put(self, *args):
         return self.__route__('PUT', *args)
-
     def respond( self, item={}, *args ):
         #self.response.out.write(self.Template+'<br/>'+ dict)
         if self.responseType =='html':
-            if isinstance(item, str):
-                self.__respond(item)
-            elif isinstance(item, dict):
-                #commented is jinja implementation of the renderer 
-                #tmpl = env.get_template(self.Template)
-                #self.response.out.write(tmpl.render(self.__render_dict(item)))
-                self.__respond( template.render( self.Template, self.__render_dict( item ),
+            if isinstance(item, dict):
+                self.do_respond( template.render( self.Template, self.get_response_dict( item ),
                                                       debug = settings.TEMPLATE_DEBUG ))
             elif isinstance(item,list):
-                return self.__respond('<ul>'+'\n'.join(['<li>'+str(x)+'</li>' for x in item])+'</ul>')
+                return self.do_respond('<ul>'+'\n'.join(['<li>'+str(x)+'</li>' for x in item])+'</ul>')
             else:
-                self.__respond(str(item))
+                self.do_respond(str(item))                
         elif self.responseType =='json':
-            self.__respond(simplejson.dumps(item))
+            self.do_respond(simplejson.dumps(item))
         else:#self.responseType('text'):
-            self.__respond(str(item))
-        
+            self.do_respond(str(item))
+                
     def respond_static(self, text):
-        self.__respond(text)
+        self.do_respond(text)
         
     def redirect( self, uri, postargs={}, permanent=False ):
         innerdict = dict( postargs )
@@ -243,18 +242,18 @@ class HalBaseHandler(object):
         if innerdict and len( innerdict ) > 0:
             params= '&'.join( [k + '=' + str(innerdict[k]) for k in innerdict] )
             if uri.find('?')==-1:
-                return self.__redirect(uri + '?' + params )
+                return self.do_redirect(uri + '?' + params )
             elif uri.endswith('&'):
-                return self.__redirect( uri + params )
+                return self.do_redirect( uri + params )
             else:
-                return self.__redirect( uri+ '&' + params )
+                return self.do_redirect( uri+ '&' + params )
         else:
-            return self.__redirect( uri )
+            return self.do_redirect( uri )
         
     def redirect_login( self ):
         self.redirect( '/Login' )
     
-    def __render_dict(self, basedict ):
+    def get_response_dict(self, basedict ):
         result={}
         result.update(self.extra_context)
         result.update(basedict)
@@ -295,7 +294,9 @@ class HalBaseHandler(object):
             
     def setup(self, request, response):
         raise NotImplementedError()
-    def __respond(self, text):
+    
+    def do_respond(self, text):
         raise NotImplementedError()
-    def __redirect(self, uri, *args):
+    
+    def do_redirect(self, uri, *args):
         raise NotImplementedError()

@@ -14,11 +14,11 @@ class DjangoRequestHandler(HalBaseHandler):
         setattr(self.response, 'headers', self.response._headers)
         self.initialize(self.request, self.response)
         
-    def __respond(self, text):
+    def do_respond(self, text):
         self.response.content = text
         return self.response
 
-    def __redirect(self, uri, *args):
+    def do_redirect(self, uri, *args):
         return HttpResponseRedirect(uri, *args)
     
     def setup(self, request, response):

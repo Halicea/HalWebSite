@@ -22,6 +22,7 @@ handlers:
 - url: /favicon\.ico
   static_files: static_data/images/favicon.ico
   upload: StaticData/images/favicon\.ico
+  
 #Remote API
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py

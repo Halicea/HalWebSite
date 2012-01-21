@@ -3,7 +3,7 @@ from lib.halicea.helpers import DynamicParameters, RequestDictMixin, ContentType
 from google.appengine.ext import webapp
 import simplejson
 
-class HalRequestHandler(HalBaseHandler, webapp.RequestHandler ):
+class HalRequestHandler(HalBaseHandler, webapp.RequestHandler):
     """Base Request handler class for the Hal framework.
         Note: standard items that are responded in the context are:
            - {{current_user}}
@@ -14,7 +14,7 @@ class HalRequestHandler(HalBaseHandler, webapp.RequestHandler ):
     """
     def __init__(self, *args, **kwargs):
         super(HalRequestHandler, self).__init__(*args, **kwargs)
-
+    
     def setup(self, request, response):
         """Initializes this request handler with the given Request and Response.
            Set the Default Plugins and Handlers
@@ -22,7 +22,6 @@ class HalRequestHandler(HalBaseHandler, webapp.RequestHandler ):
         """
         self.request = request
         self.response = response
-        #TODO: finish this part with the dynamic dict
         
         if ContentTypes_reverse.has_key(self.request.headers.environ.get('CONTENT_TYPE')):
             self.requestType =ContentTypes_reverse[self.request.headers.environ.get('CONTENT_TYPE')]
@@ -45,9 +44,9 @@ class HalRequestHandler(HalBaseHandler, webapp.RequestHandler ):
         if self.session:
             if self.session.has_key( 'status' ): self.status = self.session.pop('status')
 
-    def __respond(self, text):
+    def do_respond(self, text):
         self.response.out.write(text)
         
-    def __redirect(self, uri, *args):
+    def do_redirect(self, uri, *args):
         webapp.RequestHandler.redirect(self, uri, *args)
     

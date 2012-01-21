@@ -4,6 +4,7 @@ from controllers import ShellControllers
 from controllers import HalWebControllers
 from controllers import cmsControllers
 #{%endblock%}
+
 webapphandlers = [
 #{%block ApplicationControllers %}
 #{%block BaseControllers %}
