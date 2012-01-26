@@ -35,4 +35,3 @@ class TestLinks(unittest.TestCase):
         self.assertIsNotNone(result, 'none is returned')
         print self.response.out.getvalue()
         self.assertTrue(isinstance(result, dict), "No Dict returned. Instead dict:\r\n")
-    

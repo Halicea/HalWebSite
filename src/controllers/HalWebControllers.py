@@ -5,8 +5,8 @@ from lib.halicea.decorators import *
 ################################
 
 class WelcomeController(hrh):
-    @ClearDefaults()
-    @Default('welcome')
-    def SetOperations(self): pass
-    def welcome(self):
-        return {} 
+  @ClearDefaults()
+  @Default('welcome')
+  def SetOperations(self): pass
+  def welcome(self):
+    return {} 

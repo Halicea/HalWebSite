@@ -62,32 +62,32 @@ search_strings = [
 'playstation',
 ]
 def detect_mobile(request):
-    """Adds a "mobile" attribute to the request which is True or False
-       depending on whether the request should be considered to come from a
-       small-screen device such as a phone or a PDA"""
+  """Adds a "mobile" attribute to the request which is True or False
+     depending on whether the request should be considered to come from a
+     small-screen device such as a phone or a PDA"""
 
-    if request.headers.environ.has_key("HTTP_X_OPERAMINI_FEATURES"):
-        #Then it's running opera mini. 'Nuff said.
-        #Reference from:
-        # http://dev.opera.com/articles/view/opera-mini-request-headers/
+  if request.headers.environ.has_key("HTTP_X_OPERAMINI_FEATURES"):
+    #Then it's running opera mini. 'Nuff said.
+    #Reference from:
+    # http://dev.opera.com/articles/view/opera-mini-request-headers/
+    return True
+
+  if request.headers.environ.has_key("HTTP_ACCEPT"):
+    s = request.headers.environ["HTTP_ACCEPT"].lower()
+    if 'application/vnd.wap.xhtml+xml' in s:
+      # Then it's a wap browser
+      return True
+
+  if request.headers.environ.has_key("HTTP_USER_AGENT"):
+    # This takes the most processing. Surprisingly enough, when I
+    # Experimented on my own machine, this was the most efficient
+    # algorithm. Certainly more so than regexes.
+    # Also, Caching didn't help much, with real-world caches.
+    s = request.headers.environ["HTTP_USER_AGENT"].lower()
+    for ua in search_strings:
+      if ua in s:
         return True
 
-    if request.headers.environ.has_key("HTTP_ACCEPT"):
-        s = request.headers.environ["HTTP_ACCEPT"].lower()
-        if 'application/vnd.wap.xhtml+xml' in s:
-            # Then it's a wap browser
-            return True
 
-    if request.headers.environ.has_key("HTTP_USER_AGENT"):
-        # This takes the most processing. Surprisingly enough, when I
-        # Experimented on my own machine, this was the most efficient
-        # algorithm. Certainly more so than regexes.
-        # Also, Caching didn't help much, with real-world caches.
-        s = request.headers.environ["HTTP_USER_AGENT"].lower()
-        for ua in search_strings:
-            if ua in s:
-                return True
-
-
-    #Otherwise it's not a mobile
-    return False
+  #Otherwise it's not a mobile
+  return False

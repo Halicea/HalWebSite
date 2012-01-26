@@ -213,8 +213,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'haliceawebsite', u'Halicea  Web Site Documentation',
-     [u'Costa Halicea'], 1)
+  ('index', 'haliceawebsite', u'Halicea  Web Site Documentation',
+   [u'Costa Halicea'], 1)
 ]
 
 # If true, show URL addresses after external links.

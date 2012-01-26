@@ -1,4 +1,4 @@
-import imports
+import conf.imports
 import unittest
 import os
 from google.appengine.ext import db

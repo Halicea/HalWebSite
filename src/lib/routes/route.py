@@ -7,7 +7,6 @@ if sys.version < '2.4':
 
 from lib.routes.util import _url_quote as url_quote, _str_encode
 
-
 class Route(object):
     """The Route object holds a route recognition and generation
     routine.

@@ -30,6 +30,8 @@ class RoutesMiddleware(object):
         
         """
         self.app = wsgi_app
+        setattr(self.app, 'mapper', mapper)
+         
         self.mapper = mapper
         self.singleton = singleton
         self.use_method_override = use_method_override

@@ -1,11 +1,11 @@
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
-register = webapp.template.create_template_register()
-from django.template import resolve_variable, Node, TemplateSyntaxError, VariableDoesNotExist
+from django.template import resolve_variable, Node, TemplateSyntaxError
+from django.template import Library
+register = Library()
 # access a dictionary
+
+@register.filter
 def hash(h, key):
     return h[key] 
-register.filter(hash)
 
 class CallNode(Node):
     def __init__(self, object, method, args=None, kwargs=None, context_name=None):

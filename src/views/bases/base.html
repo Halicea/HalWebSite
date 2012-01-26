@@ -47,7 +47,7 @@ $(function(){
 </script>
 {%endblock%}
 {% block top_menu %}
-{%call this.plugins.Menus.view with "pages" "True" %}
+{%comment%}{%call this.plugins.Menus.view with "pages" "True" %}{%endcomment%}
 {% endblock %}
 
 {% block login_menu %}

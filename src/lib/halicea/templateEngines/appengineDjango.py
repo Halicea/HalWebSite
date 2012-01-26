@@ -1,12 +1,13 @@
 import os
 os.environ['DJANGO_SETTINGS_MODULE']  = 'conf.settings'
-from google.appengine.dist import use_library
-use_library('django', '1.2')
-from google.appengine.ext.webapp import template as tmpl
-from django.conf import settings
-#forse reset django settings 
-settings._target=None 
-#register filters and tags
-tmpl.register_template_library('lib.customFilters')
+from django.template.loader import get_template
+from django.template import Context
+from django.template import Library
+from lib.customFilters import hash, call
+
+register = Library()
+
 def render(template_path, template_dict, debug):
-    return tmpl.render(template_path, template_dict, debug)
+    t = get_template(template_path)
+    return t.render(Context(template_dict))
+    
