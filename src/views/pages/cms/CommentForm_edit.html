@@ -1,6 +1,6 @@
 <div class="postHeader"><h1>Comment: </h1></div>
 <div class="postContent">
-    <form id='CommentForm' method='post' action='{% url CommentController %}'>
+    <form id='CommentForm' method='post' action='{% url comment %}'>
         <input type='hidden' name='op' value={{op}}>
         <input type='hidden' name='key' value={{CommentForm.instance.key}}></input>
         <table>
@@ -23,6 +23,6 @@
 </div>
 <div class="postFooter">
     <div class="nav">
-    <a href='{%url CommentController%}'>Back</a>
+    <a href='{%url comment%}'>Back</a>
     </div>
 </div>

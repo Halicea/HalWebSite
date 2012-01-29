@@ -1,8 +1,5 @@
 from google.appengine.ext import db
 from BaseModels import Person
-import datetime as dt
-from lib.halicea.decorators import property
-from lib.halicea.HalRequestHandler import ContentTypes
 class CMSContent(db.Model):
     Title = db.StringProperty(required=True)
     HTMLContent = db.TextProperty(required=True)

@@ -51,9 +51,9 @@
 					{% block login_menu %}
 						{% if current_user %}
 						<label style="color: navy">{{current_user.Name}} {{current_user.Surname}} </label>
-						<a href="{% url LogoutController %}" style="text-align: right; color: black;">Logout</a>
+						<a href="{% url logout %}" style="text-align: right; color: black;">Logout</a>
 						{% else %}
-						<a href="{% url LoginController %}" style="text-align: right; color: black;">Login</label> </a>
+						<a href="{% url login %}" style="text-align: right; color: black;">Login</label> </a>
 						{% endif %}
 					{% endblock %}
                 </div>

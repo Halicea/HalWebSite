@@ -88,7 +88,7 @@ a img {
 Python {{ python_version }}
 </textarea>
 
-<form id="form" action="{%url StatementController%}" method="get">
+<form id="form" action="{%url statement%}" method="get">
   <nobr>
   <textarea class="prompt" id="caret" readonly="readonly" rows="4"
             onfocus="document.getElementById('statement').focus()"
@@ -105,9 +105,9 @@ Python {{ python_version }}
 <p id="toolbar">
 {% if user %}
   <span class="username">{{ user.nickname }}</span>
-  (<a href="{{ logout_url }}">log out</a>)
+  (<a href="{%url logout%}">log out</a>)
 {% else %}
-  <a href="{{ login_url }}">log in</a>
+  <a href="{%url login%}">log in</a>
 {% endif %}
  | Ctrl-Up for history | Shift-Enter for newline
  | <a href="http://code.google.com/appengine/">

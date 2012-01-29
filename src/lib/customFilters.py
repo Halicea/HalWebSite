@@ -1,4 +1,4 @@
-from django.template import resolve_variable, Node, TemplateSyntaxError
+from django.template import resolve_variable, Node, TextNode, TemplateSyntaxError
 from django.template import Library
 register = Library()
 # access a dictionary
@@ -127,5 +127,40 @@ def call(parser, token):
         return CallNode(object, method, args=args, kwargs=kwargs, context_name=context_name)
     elif len(bits) == 2:
         return CallNode(object, method)
+    else:
+        raise TemplateSyntaxError(syntax_message)
+      
+@register.tag
+def url(parser, token):
+    """
+    Passes given arguments to given method and returns result
+
+    Syntax::
+
+        {% url controller_name action params  %}
+
+    Example usage::
+        {% url post id=post.Id %} 
+    """
+
+    bits = token.split_contents()
+    syntax_message = ("%(tag_name)s expects a syntax of %(tag_name)s "
+                       "url controller <action> <*args> <**kwargs> [as <context_name>]" %
+                       dict(tag_name=bits[0]))
+
+    route_params={'controller': None, 'action':None}
+    route_kwargs=[]
+    if len(bits)>1:
+      if not bits[1].startswith("'") and bits[1].find("=")==-1:
+        route_params["controller"]=bits[1]
+      if len(bits)>2:
+        if not bits[2].startswith("'") and bits[2].find("=")==-1:
+          route_params["action"]=bits[2]
+        route_kwargs = [x for x in bits if x.find('=')>0]
+        for kwa in route_kwargs:
+          key, value = kwa.split('=')
+          route_params[key]=value
+      
+      return TextNode("/".join(["/"+route_params["controller"],"test"]))
     else:
         raise TemplateSyntaxError(syntax_message)

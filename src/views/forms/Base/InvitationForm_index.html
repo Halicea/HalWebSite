@@ -1,14 +1,13 @@
-<h2>Invitation List: </h2>
+<h2>Invitation List:</h2>
 <table>
-{% for item in InvitationList %}
-    <tr>
-        <td>
-            {{item}}
-        </td>
-        <td> <a class='delete' href='{%url InvitationController %}?op=delete&key={{item.key}}'>Delete</a></td>
-    </tr>
-{% endfor %}
-{%ifequal previousIndex -1 %}{%else%}<a href="{%url InvitationController %}?op=index&index={{previousIndex}}">Previous</a>{%endifequal%}
- | {%ifequal nextIndex 0 %}{%else%}<a href="{%url InvitationController %}?op=index&index={{nextIndex}}">Next</a>{%endifequal%}
+	{% for item in InvitationList %}
+	<tr>
+		<td>{{item}}</td>
+		<td><a class='delete' href='{%url invitation delete id=item.Id%}'>Delete</a>
+		</td>
+	</tr>
+	{% endfor %}
 </table>
-<h3><a href='{%url InvitationController %}?op=edit'>New</a><h3>
+<h3>
+	<a href='{%url invitation Id="" %}'>New</a>
+<h3>

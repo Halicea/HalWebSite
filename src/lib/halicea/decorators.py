@@ -6,24 +6,12 @@ Created on 04.1.2010
 #from lib import messages
 from conf.settings import DEBUG
 from lib import messages
-from lib.halicea import ContentTypes as ct
 import traceback,logging
 from lib.halicea import cache
 import warnings
-from lib.halicea.helpers import ClassImport
+from lib.halicea.helpers import ClassImport, NotSuportedException,\
+  NotAllowedError
 
-def property(function):
-  keys = 'fget', 'fset', 'fdel'
-  func_locals = {'doc':function.__doc__}
-  def probe_func(frame, event, arg):
-    if event == 'return':
-      locals = frame.f_locals
-      func_locals.update(dict((k, locals.get(k)) for k in keys))
-#      sys.settrace(None)
-    return probe_func
-#  sys.settrace(probe_func)
-  function()
-  return property(**func_locals)
 
 def CopyDecoratorProperties(func, new_func):
   new_func.__name__ = func.__name__
@@ -42,6 +30,7 @@ def deprecated(func):
   return new_func
 
 #Decorators for Set Operations Method
+
 class ClearDefaults(object):
   def __init__(self):
     pass
@@ -62,6 +51,7 @@ class Post(object):
       return f(request, *args, **kwargs)
     CopyDecoratorProperties(f, new_f)
     return new_f
+
 class Get(object):
   def __call__(self, f):
     def new_f(request, *args, **kwargs):
@@ -70,12 +60,14 @@ class Get(object):
       return f(request, *args, **kwargs)
     CopyDecoratorProperties(f, new_f)
     return new_f
+
 def Put(func):
   def new_f(request, *args, **kwargs):
     if request.method!='PUT':
       raise Exception('Only PUT requests are accepted from the handler')
     return func(request, *args, **kwargs)
   return new_f
+
 class Methods(object):
   def __init__(self, *args):
     self.methods = args
@@ -86,17 +78,26 @@ class Methods(object):
       return f(request, *args, **kwargs)
     CopyDecoratorProperties(f, new_f)
     return new_f
+
 class Default(object):
   def __init__(self, method):
     self.default = method
+    if isinstance(self.default, str):
+      self.key=method
+    elif callable(method):
+      self.key = method.__name__
+    else:
+      raise NotSuportedException('Only callables and strings are accepted as arguments, instead %s was given'%str(type(self.default)))
 
   def __call__(self, f):
     def new_f(request, *args, **kwargs):
       request.operations['default']={'method':self.default}
+      request.operations[self.key]={'method':self.default}      
       result = f(request, *args, **kwargs)
       return result
     CopyDecoratorProperties(f, new_f)
     return new_f
+
 class Handler(object):
   def __init__(self, operation=None, method=None):
     self.operation = operation or 'default'
@@ -114,16 +115,17 @@ class Handler(object):
 #End Decorators for Set Operations Method
 
 # Decorators for Handler Methods
+
 class View(object):
-  def __init__(self, **template):
+  def __init__(self, template):
     self.template = template
     
   def __call__(self, f):
     def new_f(request, *args, **kwargs):
-      if(hasattr(self.template, '__call__')):
-        request.SetTemplate(**self.template(request, *args, **kwargs))
+      if callable(self.template):
+        request.SetTemplate(self.template(request, *args, **kwargs))
       else:
-        request.SetTemplate(**self.template)
+        request.SetTemplate(self.template)
       return f(request, *args, **kwargs)
     CopyDecoratorProperties(f, new_f)
     return new_f
@@ -156,6 +158,7 @@ class LogInRequired(object):
     return new_f
 
 class AdminOnly(object):
+
   def __init__(self, redirect_url='/login', message= messages.must_be_admin):
     self.redirect_url = redirect_url
     self.message = message
@@ -165,11 +168,15 @@ class AdminOnly(object):
     def new_f(request, *args, **kwargs):
       if request.User and request.User.IsAdmin:
         return f(request, *args, **kwargs)
-      else:
+      elif self.redirect_url:
         request.status= self.message
         request.redirect(self.redirect_url)
+      else:
+        raise NotAllowedError("Access is Not Allowed")
+      
     CopyDecoratorProperties(f, new_f)
     return new_f
+  
 class InRole(object):
   def __init__(self, role='Admin',redirect_url='/login', message= messages.must_be_in_role):
     self.redirect_url = redirect_url
@@ -180,11 +187,14 @@ class InRole(object):
     def new_f(request, *args, **kwargs):
       if request.User and request.User.IsAdmin:
         return f(request, *args, **kwargs)
-      else:
+      elif self.redirect_url:
         request.status= self.message
         request.redirect(self.redirect_url)
+      else:
+        raise NotAllowedError("Access is Not Allowed")
     CopyDecoratorProperties(f, new_f)
     return new_f
+  
 class ErrorSafe(object):
   def __init__(self,
          redirectUrl = '/',
@@ -200,12 +210,12 @@ class ErrorSafe(object):
       try:
         return f(request, *args, **kwargs)
       except self.Exception, ex:
-        if request.ResponseType == ct.JSON:
+        if request.ResponseType == 'json':
           if self.showStackTrace:
             return '''{message:"%s", stackTrace:"%s"}'''%(str(ex)+'\n'+traceback.format_exc())
           else:
             return '''{message:%s}'''%(self.message)
-        elif request.ResponseType == ct.XML:
+        elif request.ResponseType == 'xml':
           if self.showStackTrace:
             return '''<root><message>%s</message><stackTrace>%s</stackTrace></root>"'''%(str(ex)+'\n'+traceback.format_exc())
           else:
@@ -223,15 +233,16 @@ class ErrorSafe(object):
           request.redirect(self.redirectUrl)
     CopyDecoratorProperties(f, new_f)
     return new_f
+
 class ExtraContext(object):
   def __init__(self, context_dicts):
-    """context_docts is an array of dictionaries or a single dictionary"""
+    """context_dicts is an array of dictionaries or a single dictionary"""
     if isinstance(context_dicts, dict):
       self.context_dicts = [context_dicts,]
     elif isinstance(context_dicts, list):
       self.context_dicts = context_dicts
     else:
-      raise Exception("Wrong Extra context input variable, Mut be either dict of list of dicts")
+      raise Exception("Wrong ExtraContext constructor variable, Must be either dictionary of list of dictionaries")
 
   def __call__(self, f):
     def new_f(request, *args, **kwargs):
@@ -245,12 +256,10 @@ class ExtraContext(object):
 
 #Cache Decorators
 
-#TODO: Make it as a class and change the name of the returning funciton. 
-#also add it into the decorators module
 class Cached(object):
   @staticmethod
   def resName(res , request, *args, **kwargs):
-    #fully identify the source by it's name
+    #fully identify the source by it's name and parameters
     return '__RESOURCE__'+request.__module__+"."+request.__name__+'.'+res.__name__+\
             '('+\
               ','.join(set([\
@@ -282,7 +291,7 @@ class Cached(object):
     return new_f
 
 class ClearCacheAfter(object):
-  """Clears the cache of a given controller action after the excution of the called action
+  """Clears the cache of a given controller action after the execution of the called action
     Example:
       
       @ClearCacheAfter(SomeControllerClass.Method, *methodargs, **methodskwargs)
@@ -309,6 +318,12 @@ class ClearCacheAfter(object):
     return new_f
   
 class ClearCacheFirst(object):
+  """Clears the cache of a given controller action before the execution of the called action
+    Example:
+      
+      @ClearCacheFirst(SomeControllerClass.Method, *methodargs, **methodskwargs)
+      def delete(self, arguments)
+  """
   def __init__(self, action, params_function=None):
     if params_function:
       self.params_f = params_function
@@ -322,16 +337,18 @@ class ClearCacheFirst(object):
       return f(request, *args, **kwargs)
     CopyDecoratorProperties(f, new_f)
     return new_f  
-  
+# 
+
 class ResponseType():
+  """sets the response type of the controller action""" 
   def __init__(self, contentType):
     if isinstance(contentType, str):
-      self.respond = lambda request, *args, **kwargs: contentType
+      self.responseType = lambda request, *args, **kwargs: contentType
     else:
-      self.respond = contentType
+      self.responseType = contentType
   def __call__(self, f):
     def new_f(request, *args, **kwargs):
-      request.ResponseType = self.respond(request, *args, **kwargs)
+      request.ResponseType = self.responseType(request, *args, **kwargs)
       return f(request, *args, **kwargs)
     CopyDecoratorProperties(f, new_f)
     return new_f

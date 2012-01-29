@@ -3,7 +3,7 @@
 
 <div class="post">
     <div class="postContent">
-        {%call this.Html.AjaxForm.beginForm with name="saveContent" action="/cms/contents" method="post" %}        
+        {%comment%} call this.Html.AjaxForm.beginForm with name="saveContent" action="/cms/contents" method="post" {%endcomment%}        
         <form action="/cms/contents" method="post" id="saveContent">
             <input type="hidden" name="op" value="save" />
             <input type="hidden" name="key" value="{{content.key}}" />
@@ -42,7 +42,7 @@
                 </tr>
             </table>
          </form>
-        {%call this.Html.AjaxForm.endForm %}
+        {%comment%}call this.Html.AjaxForm.endForm {%endcomment%}
     </div>
 </div>
 <script type="text/javascript">

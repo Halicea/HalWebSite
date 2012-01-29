@@ -14,12 +14,12 @@
    			{%if Content.Links%}
    			<ul class="content-links" for="{{Content.key}}">
    				{%for l in Content.get_links%}
-   					<li><a href="/cms/page/{{l.addressName}}">l.Name</a></li>TODO:[Delete|Edit]
+   					<li><a href="{%url page name=l.addressName">l.Name</a></li>TODO:[Delete|Edit]
    				{%endfor%}
    			</ul>
    			{%else%}
    				No Links Available:
-   				<a href="{%url LinksController%}?key={{l.key}}">_(Publish this Content)</a>
+   				<a href="{%url links id=l.Id%}">_(Publish this Content)</a>
    			{%endif%}
    		</div>
    </div>

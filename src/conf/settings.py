@@ -2,7 +2,7 @@
 import os
 from os.path import join
 PLATFORM = 'appengine'
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 DEFAULT_CHARSET ='UTF-8'
 
@@ -18,17 +18,16 @@ DEFAULT_OPERATIONS =\
    }
 
 PLUGINS =\
-  [
-   ("Links", 'controllers.cmsControllers.CMSLinksController'),
-   ("Contents", 'controllers.cmsControllers.CMSContentController'),
-   ("Menus", 'controllers.cmsControllers.MenuController'),
-  ]
+  {
+   "Links":'controllers.cmsControllers.CMSLinksController',
+   "Contents":'controllers.cmsControllers.CMSContentController',
+   "Menus":'controllers.cmsControllers.MenuController',
+  }
 
-EXTENSIONS =\
-   [
+EXTENSIONS =[
   'lib.halicea.extensions.AuthenticationMixin',
   'lib.halicea.extensions.HtmlMixin'
-   ]
+  ]
 
 APPENGINE_PATH = '/home/costa/DevApps/google_appengine'
 if os.name == 'nt':
@@ -86,7 +85,10 @@ MagicLevel = 3
 #SAME CONFINGURATION IS USED FOR DJANGO 
 TEMPLATE_DIRS = (VIEWS_DIR,)
 ROOT_URLCONF ='handlerMap'
-TEMPLATE_LOADERS = ('lib.halicea.HalTemplateLoader.HalLoader','django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader')
+TEMPLATE_LOADERS = (
+          'lib.halicea.HalTemplateLoader.HalLoader',
+          'django.template.loaders.filesystem.Loader', 
+          'django.template.loaders.app_directories.Loader')
 
 #PASTE YOUR CONFIGURATION HERE
 USE_I18N = False

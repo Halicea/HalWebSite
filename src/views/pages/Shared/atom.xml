@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"
+	xml:base="http://www.example.org">
+	<id>urn:uuid:{{uuid}}</id>
+	<title>{{title}}</title>
+	<subtitle>{{subtitle}}</subtitle>
+	<updated>{{ updated }}</updated>
+	<author>
+		<name>{{author_name}}</name>
+		<email>{{author_email}}</email>
+	</author>
+	<link href="{{page_link}}" />
+	<link rel="self" href="{{feed_link}}" />
+	{% for post in posts %}
+	<entry>
+		<title>{{post.title}}</title>
+		
+		<link href="{{post.url}}" />
+		
+		<id>{{post.Id}}</id>
+		
+		<summary>{{post.Summary}}</summary>
+		
+		<updated>{{post.Updated}}</updated>
+		
+	</entry>
+	{% endfor %}
+</feed>

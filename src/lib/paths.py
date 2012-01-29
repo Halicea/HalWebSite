@@ -54,9 +54,4 @@ __blocksDict__={
         ### Menu Blocks
         }
 
-__pluginsDict__={
-                 'plQuestionarySmall': {'path': '../../lib/plugins/questionaryPlugin',
-                                        'view': 'questionaryView.html',
-                                        'controller': '',
-                                        },
-                 }
+__pluginsDict__={}

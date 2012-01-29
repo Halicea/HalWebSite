@@ -15,6 +15,8 @@ class NotSuportedException(Exception):
     self.message = message or "Operation is not supported"
   def __str__(self):
     return self.message
+class NotAllowedError(Exception):
+  pass
 
 def ClassImport(name):
   components = name.split('.')

@@ -1,18 +1,18 @@
 {%extends base %}
 {%block content%}
-	<div class="post">
-       <div class="postHeader"><h1>{{link.Content.Title}}</h1></div>
-       <div class="postContent">
-            {%autoescape off%}{{link.Content.HTMLContent}}{%endautoescape%}
-       </div>
-       <div class="postFooter">
-       		<div class="nav">
-       			Created by {{link.Content.Creator.Name}} {{link.Content.Creator.Surname}} on {{link.Content.DateCreated}}
-       		</div>
-       </div>
-       {%comment%}<div class="postComments">
-       		<div class="fb-comments" data-href="http://{{current_server}}/cms/page/{{link.AddressName}}" data-num-posts="5" data-width="500"></div>
-       </div>
-       {%endcomment%}
-    </div>
+<div class="post">
+	<div class="postHeader"><h1>{{link.Content.Title}}</h1></div>
+	<div class="postContent">
+	  {%autoescape off%}{{link.Content.HTMLContent}}{%endautoescape%}
+	</div>
+	<div class="postFooter">
+		<div class="nav">
+			Created by {{link.Content.Creator.Name}} {{link.Content.Creator.Surname}} on {{link.Content.DateCreated}}
+	  </div>
+	</div>
+	{%comment%}<div class="postComments">
+	  <div class="fb-comments" data-href="http://{{current_server}}/cms/page/{{link.AddressName}}" data-num-posts="5" data-width="500"></div>
+	</div>
+  {%endcomment%}
+</div>
 {% endblock %}

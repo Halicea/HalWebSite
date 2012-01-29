@@ -1,31 +1,32 @@
 from google.appengine.ext import db
-from lib.halicea.decorators import *
+from lib.halicea.decorators import View, ResponseType
 from Magic import MagicSet
-@View(templateGroup='page', templateType='Shared', templateName='edit.html')
-def edit(request, *args, **kwargs):
-  if request.params.key:
-    item = db.get(request.params.key)
-    if item:
-      return {'op':'upd', 'form': MagicSet.getFormClass(request)(instance=item)}
-    else:
-      request.status = 'Item does not exists'
-      request.redirect(request.get_url())
-  else:
-    request.status = 'Key not provided'
-    return {'op':'ins' ,'form':MagicSet.getFormClass(request)()}
-
-@View(templateGroup='page', templateType='Shared', templateName='index.html')
+from lib.halicea import ContentTypes
+@View('shared/index.html')
+@ResponseType(lambda r, *args,**kwargs:kwargs.has_key('type') and kwargs['type'] or 'html')
 def index(request, *args, **kwargs):
-  results =None
-  result = {'items': MagicSet.getModelClass(request).all().fetch(limit=1000)}
-  return result.update(locals())
+  return {'items': MagicSet.getModelClass(request).all().fetch(limit=1000)}
 
-@View(templateGroup='page', templateType='Shared', templateName='details.html')
-def details(request, *args, **kwargs):
+@View('shared/view.html')
+@ResponseType(lambda r, *args,**kwargs:kwargs.has_key('type') and kwargs['type'] or 'html')
+def view(request, *args, **kwargs):
   if request.params.key:
     return {'item':db.get(request.params.key)}
   else:
     request.status='Not Valid key was provided'
+
+@View('shared/edit.html')
+@ResponseType(lambda r, *args,**kwargs:kwargs.has_key('type') and kwargs['type'] or 'html')  
+def edit(request, *args, **kwargs):
+  if request.params.key:
+    item = db.get(request.params.key)
+    if item:
+      return {'op':'save', 'form': MagicSet.getFormClass(request)(instance=item)}
+    else:
+      request.status = 'Item does not exists'
+      request.redirect(request.get_url())
+  else:
+    return {'op':'insert' ,'form':MagicSet.getFormClass(request)()}
 
 def delete(request, *args, **kwargs):
   if request.params.key:

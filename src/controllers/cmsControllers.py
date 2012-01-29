@@ -7,7 +7,7 @@ from forms.cmsForms import CMSContentForm, CMSMenuForm
 from google.appengine.ext import db
 from lib import messages
 from django.utils import simplejson
-
+from google.appengine.ext.webapp import template
 contentTypeViews={
           cms.ContentType.CMSPage:'CMSPage.html',
           cms.ContentType.CMSPage:'CMSPost.html',
@@ -27,7 +27,7 @@ class CMSLinksController(CMSBaseController):
   @Handler('delete')
   def SetOperations(self):pass
 
-  @View(templateName='CMSLinks.html')
+  @View('CMSLinks.html')
   def index(self, menu='cms', *args):
     result ={'CMSContentForm': CMSContentForm(), 'MenuForm':CMSMenuForm(), };
     result.update(self.plugins.Contents.index())
@@ -160,7 +160,7 @@ class MenuController(CMSBaseController):
     menu = cms.Menu.get_by_key_name(name)
     menu.delete()
 
-  @View(templateName='Menu_edit.html')
+  @View('Menu_edit.html')
   def edit(self,*args):
     menu = None
     frm = None
@@ -209,7 +209,7 @@ class CMSContentController(CMSBaseController):
     posts= posts.fetch(self.params.limit or 20, self.params.offset or 0)
     return locals()
 
-  @View(templateName = 'CMSContent.html')
+  @View('CMSContent.html')
   def index(self, *args):
     limit = 10
     offset = 0
@@ -234,7 +234,7 @@ class CMSContentController(CMSBaseController):
     return {'contents':contents}
 
   @LogInRequired()
-  @View(templateName = "CMSContent.html")
+  @View("CMSContent.html")
   def my_contents(self):
     limit = self.params.limit or 20
     offset = self.params.offset or 0
@@ -324,7 +324,7 @@ class CMSPageController(CMSBaseController):
       self.status ="Not Valid Page"
       self.redirect(LoginController.get_url())
   
-  @View(templateName='CMSPage_index.html')
+  @View('CMSPage_index.html')
   @Cached()
   def index(self, tag=None):
     limit = int(self.params.limit or 20)

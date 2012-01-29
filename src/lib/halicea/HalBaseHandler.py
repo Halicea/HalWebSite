@@ -5,13 +5,10 @@ import conf.settings as settings
 from conf.imports import template
 from lib.halicea.Magic import MagicSet
 from lib.halicea import  mobile_agents
-from lib.halicea.helpers import DynamicParameters, LazyDict, ContentTypes
+from lib.halicea.helpers import\
+  DynamicParameters, LazyDict, ContentTypes, NotSuportedException
 from lib.halicea.helpers import ClassImport
 import simplejson
-templateGroups = {'form':settings.FORM_VIEWS_DIR,
-          'page':settings.PAGE_VIEWS_DIR,
-          'block':settings.BLOCK_VIEWS_DIR,
-          'base':settings.BASE_VIEWS_DIR,}
 
 class HalBaseHandler(object):  
   def __init__(self, *args, **kwargs):
@@ -33,6 +30,7 @@ class HalBaseHandler(object):
     self.__templateIsSet__= False
     self.__template__ =""
     self.extra_context ={}
+    self.dispatcher = HalActionDispatcher()
   
   def initialize( self, request, response):
     self.setup(request, response)
@@ -84,63 +82,31 @@ class HalBaseHandler(object):
   
   def __get_template(self):
     if not self.__templateIsSet__:
-      self.SetTemplate(None, None, None)
+      self.SetTemplate()
     return self.__template__
   Template =property(__get_template)
-  def SetTemplate(self,templateGroup=None, templateType=None, templateName=None):
-    bn = MagicSet.baseName(self)
-#    templateTypes = The specific modelFullName
-    if not templateGroup:
-      self.TemplateDir =settings.PAGE_VIEWS_DIR
-    else:
-      self.TemplateDir = templateGroups[templateGroup]
-
-    if not templateType:
-      self.TemplateType = bn[:bn.rindex('.')].replace('.', path.sep)
-    else:
-      self.TemplateType = templateType.replace('.', path.sep)
-
-    if not templateName: #default name will be set
-      self.__template__ = os.path.join(self.TemplateDir, self.TemplateType, bn[bn.rindex('.')+1:])
-      if self.op:
-        self.__template__ += '_'+self.op
-      self.__template__+=settings.VIEW_EXTENSTION
-    else:
-      self.__template__ = os.path.join(self.TemplateDir, self.TemplateType, templateName)
-      
+  def SetTemplate(self,templatePath=None):
+    self.TemplateType = os.path.basename(settings.PAGE_VIEWS_DIR)
+    self.TemplateDir, bn = MagicSet.baseName(self, True)
+    name = bn+(self.op and '_'+self.op or '')+settings.VIEW_EXTENSTION
+    if templatePath:
+        res = templatePath.split('/')
+        x = len(res)        
+        if x>3:
+          self.TemplateType = res[0]
+          self.TemplateDir = '/'.join(res[1:-1])
+          name = res[-1]
+        elif x==3:
+          self.TemplateType, self.TemplateDir, name = tuple(res)
+        elif x==2:
+          self.TemplateDir, name = tuple(res)
+        elif x==1:
+          name = res[0]
+          
+    self.__template__ = os.path.join(settings.VIEWS_DIR, self.TemplateType, self.TemplateDir, name)
     self.__templateIsSet__ = True
-    def GetTemplatePath(self, templateGroup=None, templateType=None, templateName=None):
-      tDir = None
-      tType =None
+    
 
-      result = None
-      if templateName == templateGroup == templateType == None and self.__templateIsSet__:
-        return self.Template
-      bn = MagicSet.baseName(self)
-      #templateTypes = The specific modelFullName
-      if not templateGroup:
-        tDir =settings.PAGE_VIEWS_DIR
-      else:
-        tDir = templateGroups[templateGroup]
-  
-      if not templateType:
-        tType = bn[:bn.rindex('.')].replace('.', path.sep)
-      else:
-        tType = templateType.replace('.', path.sep)
-  
-      if not templateName: #default name will be set
-        result = os.path.join(tDir, tType, bn[bn.rindex('.')+1:])
-        if self.op:
-          result += '_'+self.op
-        else:
-          try:
-            result += '_'+self.operations['default']['method'].__name__
-          except :
-            result += '_'+self.operations['default']['method']
-        result+=settings.VIEW_EXTENSTION
-      else:
-        result = os.path.join(tDir, tType, templateName)
-      return result
   def SetDefaultPlugins(self):
     if hasattr(settings, 'PLUGINS'):
       self.plugins = DynamicParameters(LazyDict(settings.PLUGINS, 'initialize', self.request, self.response))
@@ -176,55 +142,38 @@ class HalBaseHandler(object):
        in future it can be replaced with different routing methods
        now it routes in the methods by a given parameter named op
     """
-    self.method = method
-    #if there is explicitly setup opration then use that one
-    if self.params.op:
-      self.op= self.params.op
-       
-    outresult = 'No Result returned'
-    if self.operations.has_key(self.op):
-      if isinstance(self.operations[self.op]['method'], str):
-        outresult = getattr(self, self.operations[self.op]['method'])(*args, **kwargs)
-      else:
-        if hasattr(self, self.operations[self.op]['method'].__name__):
-          outresult = getattr(self, self.operations[self.op]['method'].__name__)(*args, **kwargs)
-        else:
-          outresult = self.operations[self.op]['method'](self, *args, **kwargs)
-    else:
-      if isinstance(self.operations['default']['method'], str):
-        outresult = getattr(self, self.operations['default']['method'])(*args, **kwargs)
-      else:
-        if hasattr(self, self.operations['default']['method'].__name__):
-          outresult = getattr(self, self.operations['default']['method'].__name__)(*args, **kwargs)
-        else:
-          outresult = self.operations['default']['method'](self, *args, **kwargs)
-    if outresult!=None:
-      return self.respond(outresult)
-  
+    result = self.dispatcher.dispatch(self, *args, **kwargs)
+    if result:
+      self.respond(result)
+      
   #otherwise we have been redirected
   def get(self, *args):
-    """Used to comply with the appengines webob Controller"""
     return self.__route__('GET', *args)
+  
   def post(self, *args):
-    """Used to comply with the appengines webob Controller"""
     return self.__route__('POST', *args)
+  
   def put(self, *args):
     return self.__route__('PUT', *args)
+  
+  def delete(self, *args, **kwargs):
+    return self.__route__('DELETE', *args)
+  
   def respond( self, item={}, *args ):
     #self.response.out.write(self.Template+'<br/>'+ dict)
-    if self.responseType =='html':
+    if self.responseType in ['html', 'xml', 'atom', 'rss']:
       if isinstance(item, dict):
         self.do_respond( template.render( self.Template, self.get_response_dict( item ),
                             debug = settings.TEMPLATE_DEBUG ))
-      elif isinstance(item,list):
-        return self.do_respond('<ul>'+'\n'.join(['<li>'+str(x)+'</li>' for x in item])+'</ul>')
+      elif isinstance(item, str):
+        self.do_respond(item)
       else:
-        self.do_respond(str(item))        
+        raise NotSuportedException("Only dictionary and string objects are accepted as return types from actions, insteat that an %s type is returned"%str(type(item)))        
     elif self.responseType =='json':
       self.do_respond(simplejson.dumps(item))
-    else:#self.responseType('text'):
-      self.do_respond(str(item))
-        
+    else:#self.respond('text'):
+      self.do_respond(item)
+    
   def respond_static(self, text):
     self.do_respond(text)
     
@@ -270,10 +219,15 @@ class HalBaseHandler(object):
       result['op'] = self.op
     if not result.has_key('request'):
       result['this']=self
-    #update the variables
+      
+    #update the template paths
+    #bases
     result.update(paths.GetBasesDict())
+    #blocks
     result.update(paths.GetBlocksDict())
+    #forms
     result.update(paths.GetFormsDict(path.join(settings.FORM_VIEWS_DIR, self.TemplateType))) ##end
+    #current template directory
     result.update(paths.getViewsDict(os.path.dirname(self.Template)))
     
     if mobile_agents.detect_mobile(self.request): #decide if the request is mobile
@@ -298,3 +252,22 @@ class HalBaseHandler(object):
   
   def do_redirect(self, uri, permanent=True):
     raise NotImplementedError()
+  
+class HalActionDispatcher(object):
+  def dispatch(self, controller, *args, **kwargs):
+    
+    action_func = controller.operations[controller.op or 'default']['method']
+    if isinstance(action_func, str):
+      if '.' in action_func:
+        action_func = ClassImport(action_func)
+      else:
+        action_func = getattr(controller, action_func)
+      if not action_func:
+        raise Exception("Invalid action")
+    elif not callable(action_func):
+      raise NotSuportedException("Only string and callabels are accepted as Controller action arguments. Instead %s found."%str(type(action_func)))
+
+    return action_func(controller, *args, **kwargs)
+
+
+  

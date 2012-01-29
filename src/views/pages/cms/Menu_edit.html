@@ -1,6 +1,10 @@
 <form id="saveMenu" action="/menu" method='post'>
 <input type="hidden" name="op" value="save"/>
 Menu Name:
-<p>{{MenuForm.Name}}</p>
+<p>
+	{%autoescape off%}
+	{{MenuForm.Name}}
+	{%endautoescape%}
+</p>
 <input type="submit" value="Save" return false;"/>
 </form>
